@@ -7,7 +7,7 @@ using Reactor.Utilities;
 
 namespace HostUtility;
 
-[BepInAutoPlugin]
+[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "1.0.0")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 public partial class HostUtilityPlugin : BasePlugin
@@ -21,6 +21,7 @@ public partial class HostUtilityPlugin : BasePlugin
         BanWords.Initialize();
         Harmony.PatchAll();
         ChatCommandsManager.Initialize();
+        ReactorCredits.Register<HostUtilityPlugin>(_ => true);
         Log.LogInfo("Host Utility loaded successfully! :D");
         MinLevel = Config.Bind<int>("Join Conditions", "Minimum Level", 0);
         BanInappropriateNames = Config.Bind<bool>("Join Conditions", "Ban Inappropriate Names", true);
