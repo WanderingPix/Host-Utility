@@ -36,6 +36,7 @@ public static class BanWords
 
     public static bool ContainsSwear(string input)
     {
+        input = input.ToLower().Replace(" ", "");
         foreach (var swear in GetSwearsList())
         {
             if (input.Contains($" {swear} ", StringComparison.OrdinalIgnoreCase) || input.StartsWith($"{swear} ", StringComparison.OrdinalIgnoreCase) || input.EndsWith($" {swear}", StringComparison.OrdinalIgnoreCase) || input == swear)

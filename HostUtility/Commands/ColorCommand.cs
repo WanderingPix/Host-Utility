@@ -12,7 +12,7 @@ public class ColorCommand : ChatCommand
     public override List<CommandArgument> Arguments => new(new []
     {
         new CommandArgument(CommandArgument.ArgumentType.Player, "PlayerName"),
-        new CommandArgument(CommandArgument.ArgumentType.Int, "Color")
+        new CommandArgument(CommandArgument.ArgumentType.Color, "Color")
     });
 
     public override void Execute(string[] args)

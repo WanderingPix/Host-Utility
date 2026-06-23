@@ -30,7 +30,7 @@ public class PlayerControlPatches
         })));
         __instance.StartCoroutine(Effects.ActionAfterDelay(1f, new System.Action(() =>
         {
-            if (plugin.KickSuspectedPlayers.Value && AUFilesManager.Data.entries.Count(x => x.friend_code == __instance.Data.FriendCode) > 0)
+            if (plugin.KickSuspectedPlayers.Value && __instance.Data.FriendCode != string.Empty && AUFilesManager.Data.entries.Count(x => x.friend_code == __instance.Data.FriendCode) > 0)
                 AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Suspected EDater/Pdf", false);
         })));
         SendHUMessage(__instance);

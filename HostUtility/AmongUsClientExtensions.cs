@@ -4,6 +4,7 @@ public static class AmongUsClientExtensions
 {
     public static void KickWithReason(this AmongUsClient instance, int clientId, string reason, bool ban)
     {
+        if (!instance.AmHost) return;
         AmongUsClient.Instance.KickPlayer(clientId, ban);
         if (HudManager.Instance)
         {
