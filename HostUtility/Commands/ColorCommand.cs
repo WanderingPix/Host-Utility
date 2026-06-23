@@ -24,6 +24,6 @@ public class ColorCommand : ChatCommand
         var name = Palette.ColorNames.First(x => TranslationController.Instance.GetString(x).ToLower() == colorName.ToLower());
         var index = Palette.ColorNames.IndexOf(name);
         
-        target.CmdCheckColor((byte)index);
+        target.RpcSetColor((byte)index);
     }
 }

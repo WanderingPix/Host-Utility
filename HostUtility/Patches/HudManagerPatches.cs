@@ -23,7 +23,7 @@ public class HudManagerPatches
         string allCommands = string.Empty;
         foreach (var command in ChatCommandsManager.Commands)
         {
-            allCommands += $"<b>/{command.Command}</b> : {command.Description}.\n<size=70%>";
+            allCommands += $"<b>/{command.Command}</b> : {command.Description}\n<size=70%>";
             foreach (var arg in command.Arguments)
             {
                 allCommands += $"- {arg.Name} ({arg.Type.ToString()})\n";
@@ -31,5 +31,7 @@ public class HudManagerPatches
             allCommands += "</size>\n";
         }
         __instance.Chat.AddChatWarning("<color=black>" + allCommands + "</color>");
+        __instance.Chat.AddChatWarning(
+            "<size=50%> Edater/PDF Filtering is powered by https://au.tntaddict.net/aufiles which may not be fully accurate!");
     }
 }

@@ -1,4 +1,8 @@
+using System.Linq;
+using AmongUs.InnerNet.GameDataMessages;
 using HarmonyLib;
+using Hazel;
+using HostUtility.AUFiles;
 using Reactor.Utilities;
 
 namespace HostUtility.Patches;
@@ -19,10 +23,32 @@ public class PlayerControlPatches
             if (BanWords.ContainsSwear(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value)
                 AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Inappropriate username", true);
         })));
-        __instance.StartCoroutine(Effects.ActionAfterDelay(1f, new System.Action(() =>
+        __instance.StartCoroutine(Effects.ActionAfterDelay(1.5f, new System.Action(() =>
         {
             if (__instance.Data.PlayerLevel < plugin.MinLevel.Value)
                 AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Low level", false);
         })));
+        __instance.StartCoroutine(Effects.ActionAfterDelay(1f, new System.Action(() =>
+        {
+            if (plugin.KickSuspectedPlayers.Value && AUFilesManager.Data.entries.Count(x => x.friend_code == __instance.Data.FriendCode) > 0)
+                AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Suspected EDater/Pdf", false);
+        })));
+        SendHUMessage(__instance);
+    }
+
+    private static void SendHUMessage(PlayerControl target)
+    {
+        if (target.AmOwner) return;
+        var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
+        string message = $"<size=130%>This Lobby is running using Host Utility!{HostUtilityPlugin.Version}</size>\n" + 
+                                                                              "Currently set options:\n" + 
+                                                                              $"- Chat Message Filtering: {plugin.BanInappropriateMessages.Value}\n" +
+                                                                              $"- Player Names Filtering: {plugin.BanInappropriateNames.Value}\n" +
+                                                                              $"- Minimum Level required to play: {plugin.MinLevel.Value}\n" + 
+                                                                              $"- Kick suspected e-daters and predators: {plugin.KickSuspectedPlayers.Value}" +
+                                                                              $"- Game Start countdown time: {plugin.GameStartCountdownTime.Value}";
+        var rpc = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)RpcCalls.SendChat, SendOption.Reliable, (int)target.NetId);
+        rpc.Write(message);
+        AmongUsClient.Instance.FinishRpcImmediately(rpc);
     }
 }
