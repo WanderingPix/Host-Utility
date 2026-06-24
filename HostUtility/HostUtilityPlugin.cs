@@ -20,6 +20,8 @@ public partial class HostUtilityPlugin : BasePlugin
     public ConfigEntry<bool> BanInappropriateNames;
     public ConfigEntry<bool> BanInappropriateMessages;
     public ConfigEntry<bool> KickSuspectedPlayers;
+    public ConfigEntry<string> LastFetchTime;
+    public ConfigEntry<string> LastFetchedData;
     public Harmony Harmony { get; } = new(Id);
     public override void Load()
     {
@@ -33,6 +35,8 @@ public partial class HostUtilityPlugin : BasePlugin
         BanInappropriateMessages = Config.Bind<bool>("Join Conditions", "Ban Inappropriate Messages", true);
         KickSuspectedPlayers = Config.Bind<bool>("Join Conditions", "Kick Suspected E-Daters and PDFs", true);
         GameStartCountdownTime = Config.Bind("Game", "Game Start Countdown Time", 5);
-        Coroutines.Start(AUFilesManager.Initialize());
+        LastFetchTime = Config.Bind<string>("AU Files", "Last time fetched", "");
+        LastFetchedData = Config.Bind<string>("AU Files", "Last fetched data", "");
+        AUFilesManager.Initialize();
     }
 }

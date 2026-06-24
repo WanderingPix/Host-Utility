@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -17,7 +18,7 @@ public static class AUFilesManager
 {
     public static AUFilesResponse Data;
 
-    public static IEnumerator Initialize()
+    private static IEnumerator CoInitialize()
     {
         var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
         plugin.Log.LogInfo("Began request to AUFiles API for player registry.");
@@ -42,6 +43,21 @@ public static class AUFilesManager
             totalCount =  list.Count,
             totalPages = 1
         };
-        plugin.Log.LogInfo($"Loaded {Data?.entries?.Length ?? 0} entries from AUFiles API.");
+        plugin.Log.LogInfo($"Fetched {Data?.entries?.Length ?? 0} entries from AUFiles API.");
+        plugin.LastFetchedData.Value = JsonSerializer.Serialize(Data);
+        plugin.LastFetchTime.Value = DateTime.Today.ToString(CultureInfo.CurrentCulture);
+    }
+
+    public static void Initialize()
+    {
+        var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
+        if (DateTime.Compare(DateTime.Parse(plugin.LastFetchTime.Value).Date,
+                DateTime.Today) == 0)
+        {
+            Data = JsonSerializer.Deserialize<AUFilesResponse>(plugin.LastFetchedData.Value);
+            plugin.Log.LogInfo($"Loaded {Data?.entries?.Length ?? 0} entries locally from AUFiles API.");
+            return;
+        }
+        Coroutines.Start(CoInitialize());
     }
 }
