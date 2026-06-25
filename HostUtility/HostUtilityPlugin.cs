@@ -10,7 +10,7 @@ using Reactor.Utilities;
 
 namespace HostUtility;
 
-[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "1.1.1")]
+[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "1.1.2")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 public partial class HostUtilityPlugin : BasePlugin
