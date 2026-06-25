@@ -2,11 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using BepInEx;
 using HostUtility.AUFiles.API;
 using Reactor.Utilities;
 using UnityEngine;
@@ -44,20 +46,41 @@ public static class AUFilesManager
             totalPages = 1
         };
         plugin.Log.LogInfo($"Fetched {Data?.entries?.Length ?? 0} entries from AUFiles API.");
-        plugin.LastFetchedData.Value = JsonSerializer.Serialize(Data);
+        File.WriteAllText(GetDataPath(), JsonSerializer.Serialize(Data));
+        plugin.Log.LogInfo($"Cached the AUFiles data in {GetDataPath()}.");
         plugin.LastFetchTime.Value = DateTime.Today.ToString(CultureInfo.CurrentCulture);
     }
 
+    private static string GetDataPath()
+    {
+        return Path.Combine(
+            (OperatingSystem.IsAndroid()
+                ? Environment.GetEnvironmentVariable("STAR_DATA_PATH")
+                : Application.persistentDataPath) ?? "", "aufiles.json");
+    }
     public static void Initialize()
     {
         var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
-        if (DateTime.Compare(DateTime.Parse(plugin.LastFetchTime.Value).Date,
-                DateTime.Today) == 0)
+        var dataPath = GetDataPath();
+
+        bool fetchedToday = plugin.LastFetchTime.Value != string.Empty
+                            && DateTime.TryParse(plugin.LastFetchTime.Value, CultureInfo.CurrentCulture, DateTimeStyles.None, out var lastFetch)
+                            && lastFetch.Date == DateTime.Today;
+
+        if (fetchedToday && File.Exists(dataPath))
         {
-            Data = JsonSerializer.Deserialize<AUFilesResponse>(plugin.LastFetchedData.Value);
-            plugin.Log.LogInfo($"Loaded {Data?.entries?.Length ?? 0} entries locally from AUFiles API.");
-            return;
+            try
+            {
+                Data = JsonSerializer.Deserialize<AUFilesResponse>(File.ReadAllText(dataPath));
+                plugin.Log.LogInfo($"Loaded {Data?.entries?.Length ?? 0} entries locally from AUFiles API.");
+                return;
+            }
+            catch (Exception ex)
+            {
+                plugin.Log.LogWarning($"Cached AUFiles data was unreadable, refetching: {ex.Message}");
+            }
         }
+
         Coroutines.Start(CoInitialize());
     }
 }

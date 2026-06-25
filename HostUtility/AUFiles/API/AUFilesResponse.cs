@@ -6,9 +6,9 @@ namespace HostUtility.AUFiles.API;
 [Serializable]
 public class AUFilesResponse
 {
-    public AUFilesEntry[] entries;
-    public int totalCount;
-    public int page;
-    public int pageSize;
-    public int totalPages;
+    public AUFilesEntry[] entries { get; set; }
+    public int totalCount { get; set; }
+    public int page { get; set; }
+    public int pageSize { get; set; }
+    public int totalPages { get; set; }
 }
