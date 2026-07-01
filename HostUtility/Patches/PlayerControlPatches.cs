@@ -14,10 +14,10 @@ public class PlayerControlPatches
     [HarmonyPostfix]
     public static void PlayerControl_Start_Postfix(PlayerControl __instance)
     {
+        if (!AmongUsClient.Instance.AmHost) return;
         var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
         __instance.StartCoroutine(Effects.ActionAfterDelay(0.2f, new System.Action(() =>
         {
-            if (!AmongUsClient.Instance.AmHost) return;
             if (__instance == PlayerControl.LocalPlayer) return;
 
             if (BanWords.ContainsSwear(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value)
@@ -32,6 +32,8 @@ public class PlayerControlPatches
         {
             if (plugin.KickSuspectedPlayers.Value && __instance.Data.FriendCode != string.Empty && AUFilesManager.Data.entries.Count(x => x.friend_code == __instance.Data.FriendCode) > 0)
                 AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Suspected EDater/Pdf", false);
+            if (FriendsListManager.Instance.IsPlayerBlocked(AmongUsClient.Instance.GetClient(__instance.Data.ClientId).ProductUserId)) 
+                AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Blocked player", false);
         })));
         SendHUMessage(__instance);
     }

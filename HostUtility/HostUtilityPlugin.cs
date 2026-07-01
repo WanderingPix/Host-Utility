@@ -6,11 +6,13 @@ using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using HostUtility.AUFiles;
 using Reactor;
+using Reactor.Networking;
+using Reactor.Networking.Attributes;
 using Reactor.Utilities;
 
 namespace HostUtility;
 
-[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "1.1.2")]
+[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "1.2.0")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 public partial class HostUtilityPlugin : BasePlugin

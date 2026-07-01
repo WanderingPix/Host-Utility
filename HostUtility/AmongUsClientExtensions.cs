@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace HostUtility;
 
 public static class AmongUsClientExtensions
@@ -5,6 +7,8 @@ public static class AmongUsClientExtensions
     public static void KickWithReason(this AmongUsClient instance, int clientId, string reason, bool ban)
     {
         if (!instance.AmHost) return;
+        var client = AmongUsClient.Instance.GetClient(clientId);
+        if (FriendsListManager.Instance.IsPlayerFriend(client.ProductUserId)) return;
         AmongUsClient.Instance.KickPlayer(clientId, ban);
         if (HudManager.Instance)
         {
