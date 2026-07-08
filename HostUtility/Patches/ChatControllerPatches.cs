@@ -13,19 +13,6 @@ public class ChatControllerPatches
     {
         if (!AmongUsClient.Instance.AmHost) return;
 
-        if (sourcePlayer.AmOwner)
-        {
-            foreach (var command in ChatCommandsManager.Commands)
-            {
-                if (chatText.StartsWith("/" + command.Command))
-                {
-                    var args = chatText.Split(" ").ToList();
-                    args.RemoveAt(0);
-                    command.HandleExecute(args.ToArray(), out bool success);
-                }
-            }
-            return;
-        }
         if (BanWords.ContainsSwear(chatText) && PluginSingleton<HostUtilityPlugin>.Instance.BanInappropriateMessages.Value)
         {
             AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Inappropriate Message", true);

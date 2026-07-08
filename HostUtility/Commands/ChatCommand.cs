@@ -14,7 +14,7 @@ public abstract class ChatCommand
     {
         if (args.Length == 0 && Arguments.Count != 0)
         {
-            HudManager.Instance.Chat.AddChatWarning(GetInfoText());
+            HudManager.Instance.Notifier.AddDisconnectMessage(GetInfoText());
             success = true;
             return;
         }

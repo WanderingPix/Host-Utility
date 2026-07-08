@@ -1,7 +1,11 @@
 using System.Drawing;
+using System.Reflection;
 using HarmonyLib;
+using HostUtility.Components;
 using Il2CppSystem;
 using UnityEngine;
+using UnityEngine.UI;
+using Action = System.Action;
 using Color = System.Drawing.Color;
 
 namespace HostUtility.Patches;
@@ -13,25 +17,21 @@ public class HudManagerPatches
     [HarmonyPostfix]
     public static void HudManager_Start_Postfix(HudManager __instance)
     {
-        __instance.Chat.freeChatField.OnChangedEvent += new System.Action(() =>
+        var btn = UnityEngine.Object.Instantiate(__instance.GameMenu.CensorChatButton, __instance.GameMenu.transform);
+        btn.Text.text = "CMD";
+        btn.enabled = false;
+        var passiveButton = btn.GetComponent<PassiveButton>();
+        passiveButton.OnClick = new Button.ButtonClickedEvent();
+        passiveButton.OnClick.AddListener(new Action(() =>
         {
-            __instance.Chat.freeChatField.textArea.outputText.color =
-                __instance.Chat.freeChatField.Text.StartsWith("/") ? new Color32(50, 100, 150, 255) : new Color32(0, 0, 0, 255);
-        });
-        __instance.Chat.AddChatWarning(
-            "<size=130%>Thanks for downloading Host Utility!</size>\nList of all available commands:");
-        string allCommands = string.Empty;
-        foreach (var command in ChatCommandsManager.Commands)
-        {
-            allCommands += $"<b>/{command.Command}</b> : {command.Description}\n<size=70%>";
-            foreach (var arg in command.Arguments)
-            {
-                allCommands += $"- {arg.Name} ({arg.Type.ToString()})\n";
-            }
-            allCommands += "</size>\n";
-        }
-        __instance.Chat.AddChatWarning("<color=black>" + allCommands + "</color>");
-        __instance.Chat.AddChatWarning(
-            "<size=50%> Edater/PDF Filtering is powered by https://au.tntaddict.net/aufiles which may not be fully accurate!");
+            if (Minigame.Instance) return;
+            __instance.GameMenu.Close();
+            __instance.GameMenu.gameObject.SetActive(false);
+            CommandSelector.CreateAndShow();
+        }));
+        var pos = btn.gameObject.AddComponent<AspectPosition>();
+        pos.Alignment = AspectPosition.EdgeAlignments.LeftBottom;
+        pos.DistanceFromEdge = new Vector3(1.25f, 0.325f, 0);
+        pos.AdjustPosition();
     }
 }

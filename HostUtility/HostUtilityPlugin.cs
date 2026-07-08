@@ -9,10 +9,11 @@ using Reactor;
 using Reactor.Networking;
 using Reactor.Networking.Attributes;
 using Reactor.Utilities;
+using UnityEngine;
 
 namespace HostUtility;
 
-[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "1.2.0")]
+[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "1.3.0")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 public partial class HostUtilityPlugin : BasePlugin
@@ -23,14 +24,15 @@ public partial class HostUtilityPlugin : BasePlugin
     public ConfigEntry<bool> BanInappropriateMessages;
     public ConfigEntry<bool> KickSuspectedPlayers;
     public ConfigEntry<string> LastFetchTime;
+    
+    public static AssetBundle Bundle;
     public Harmony Harmony { get; } = new(Id);
     public override void Load()
     {
         BanWords.Initialize();
         Harmony.PatchAll();
         ChatCommandsManager.Initialize();
-        ReactorCredits.Register<HostUtilityPlugin>(_ => true);
-        Log.LogInfo("Host Utility loaded successfully! :D");
+        Bundle = AssetBundleManager.Load("hostutil");
         MinLevel = Config.Bind<int>("Join Conditions", "Minimum Level", 0);
         BanInappropriateNames = Config.Bind<bool>("Join Conditions", "Ban Inappropriate Names", true);
         BanInappropriateMessages = Config.Bind<bool>("Join Conditions", "Ban Inappropriate Messages", true);
@@ -38,5 +40,7 @@ public partial class HostUtilityPlugin : BasePlugin
         GameStartCountdownTime = Config.Bind("Game", "Game Start Countdown Time", 5);
         LastFetchTime = Config.Bind<string>("AU Files", "Last time fetched", "");
         AUFilesManager.Initialize();
+        ReactorCredits.Register<HostUtilityPlugin>(_ => true);
+        Log.LogInfo("Host Utility loaded successfully! :D");
     }
 }

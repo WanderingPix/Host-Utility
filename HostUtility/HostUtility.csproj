@@ -23,6 +23,11 @@
       <EmbeddedResource Include="Filters\*.txt" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="Resources\*.bundle" />
+      <EmbeddedResource Include="Resources\*.png" />
+    </ItemGroup>
+
     <Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(AmongUs)/BepInEx/plugins/" UseSymboliclinksIfPossible="true"/>
     </Target>
