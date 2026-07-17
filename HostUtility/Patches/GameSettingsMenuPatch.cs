@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
+using MonoMod.Utils;
 using Reactor.Utilities;
 using TMPro;
 using UnityEngine;
@@ -18,18 +19,42 @@ public class GameSettingsMenuPatch
         var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
         float y = GetLowestActiveY(__instance);
         
-        //CreateHeader(__instance, "Lobby", ref y);
-        //CreateInt(__instance, "Max Player Count", GameOptionsManager.Instance.CurrentGameOptions.MaxPlayers, 1, new FloatRange(4, 15), v => GameOptionsManager.Instance.CurrentGameOptions.SetInt(Int32OptionNames.MaxPlayers, (int)v), ref y);
+        CreateHeader(__instance, "Anti Cheat", ref y);
+        CreateToggle(__instance, "Check for message cooldowns", plugin.CheckMessageCooldowns.Value, b => plugin.CheckMessageCooldowns.Value = b, ref y);
+        
         CreateHeader(__instance, "Moderation", ref y);
         CreateToggle(__instance, "Ban Inappropriate Names", plugin.BanInappropriateNames.Value, b => plugin.BanInappropriateNames.Value = b, ref y);
         CreateToggle(__instance, "Ban Inappropriate Messages", plugin.BanInappropriateMessages.Value, b => plugin.BanInappropriateMessages.Value = b, ref y);
         CreateToggle(__instance, "Kick Suspected E-Daters and PDFs", plugin.KickSuspectedPlayers.Value, b => plugin.KickSuspectedPlayers.Value = b, ref y);
+        CreateToggle(__instance, "Kick Suspected Bots", plugin.KickSuspectedBots.Value, b => plugin.KickSuspectedBots.Value = b, ref y);
 
         CreateHeader(__instance, "Join Conditions", ref y);
         CreateInt(__instance, "Minimum Level", plugin.MinLevel.Value, 5, new FloatRange(0, 100), i => plugin.MinLevel.Value = (int)i, ref y);
 
         CreateHeader(__instance, "Miscellaneous", ref y);
         CreateInt(__instance, "Game Start Countdown", plugin.GameStartCountdownTime.Value, 1, new FloatRange(0, 10), i => plugin.GameStartCountdownTime.Value = (int)i, ref y);
+        
+        CreateHeader(__instance, "Advanced", ref y);
+        CreateToggle(__instance, "Show Player Platforms", plugin.ShowPlayerPlatforms.Value, b =>
+        {
+            plugin.ShowPlayerPlatforms.Value = b;
+            foreach (var p in PlayerControl.AllPlayerControls)
+            {
+                p.cosmetics.nameText.text = p.Data.PlayerName;
+                if (plugin.ShowPlayerPlatforms.Value) p.cosmetics.nameText.text += $" ({AmongUsClient.Instance.GetClientFromCharacter(p).PlatformData.Platform.ToString().SpacedPascalCase()})";
+                if (plugin.ShowPlayerIDs.Value) p.cosmetics.nameText.text += $" (ID: {p.PlayerId})";
+            }
+        }, ref y);
+        CreateToggle(__instance, "Show Player IDs", plugin.ShowPlayerIDs.Value, b =>
+        {
+            plugin.ShowPlayerIDs.Value = b;
+            foreach (var p in PlayerControl.AllPlayerControls)
+            {
+                p.cosmetics.nameText.text = p.Data.PlayerName;
+                if (plugin.ShowPlayerPlatforms.Value) p.cosmetics.nameText.text += $" ({AmongUsClient.Instance.GetClientFromCharacter(p).PlatformData.PlatformName})";
+                if (plugin.ShowPlayerIDs.Value) p.cosmetics.nameText.text += $" (ID: {p.PlayerId})";
+            }
+        }, ref y);
 
         FixScroller(__instance, y);
     }

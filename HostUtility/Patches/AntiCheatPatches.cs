@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using AmongUs.GameOptions;
 using HarmonyLib;
+using Reactor.Utilities;
 using Rewired.Utils;
 using UnityEngine;
 
@@ -25,11 +26,9 @@ public class AntiCheatPatch
         if (!AmongUsClient.Instance.AmHost) return;
         if (!MessageCooldowns.TryGetValue(sourcePlayer, out var cooldown))
         {
-            MessageCooldowns.Add(sourcePlayer, 2f);
-            return;
+            MessageCooldowns.Add(sourcePlayer, 0);
         }
-
-        if (cooldown > 0f)
+        else if (cooldown > 0f && PluginSingleton<HostUtilityPlugin>.Instance.CheckMessageCooldowns.Value)
         {
             AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Bypassing message cooldowns", true);
         }

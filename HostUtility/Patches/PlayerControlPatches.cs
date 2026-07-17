@@ -3,6 +3,7 @@ using AmongUs.InnerNet.GameDataMessages;
 using HarmonyLib;
 using Hazel;
 using HostUtility.AUFiles;
+using HostUtility.Components;
 using Reactor.Utilities;
 
 namespace HostUtility.Patches;
@@ -14,27 +15,23 @@ public class PlayerControlPatches
     [HarmonyPostfix]
     public static void PlayerControl_Start_Postfix(PlayerControl __instance)
     {
+        __instance.gameObject.AddComponent<TrackingDataBehaviour>().myPlayer = __instance;
         if (!AmongUsClient.Instance.AmHost) return;
         var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
-        __instance.StartCoroutine(Effects.ActionAfterDelay(0.2f, new System.Action(() =>
-        {
-            if (__instance == PlayerControl.LocalPlayer) return;
-
-            if (BanWords.ContainsSwear(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value)
-                AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Inappropriate username", true);
-        })));
-        __instance.StartCoroutine(Effects.ActionAfterDelay(1.5f, new System.Action(() =>
-        {
-            if (__instance.Data.PlayerLevel < plugin.MinLevel.Value)
-                AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Low level", false);
-        })));
+        if (__instance == PlayerControl.LocalPlayer) return;
         __instance.StartCoroutine(Effects.ActionAfterDelay(1f, new System.Action(() =>
         {
-            if (plugin.KickSuspectedPlayers.Value && __instance.Data.FriendCode != string.Empty && AUFilesManager.Data.entries.Count(x => x.friend_code == __instance.Data.FriendCode) > 0)
-                AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Suspected EDater/Pdf", false);
-            if (FriendsListManager.Instance.IsPlayerBlocked(AmongUsClient.Instance.GetClient(__instance.Data.ClientId).ProductUserId)) 
-                AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Blocked player", false);
+            if (__instance == PlayerControl.LocalPlayer) return;
+            if (plugin.ShowPlayerPlatforms.Value) __instance.cosmetics.nameText.text += $" ({AmongUsClient.Instance.GetClientFromCharacter(__instance).PlatformData.PlatformName})";
+            if (plugin.ShowPlayerIDs.Value) __instance.cosmetics.nameText.text += $" (ID: {__instance.PlayerId})";
+            
+            if (BanWords.ContainsSwear(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Inappropriate username", true);
+            else if (BotNames.Names.Contains(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Bot Player", true);
+            else if (__instance.Data.PlayerLevel < plugin.MinLevel.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Low level", false);
+            else if (plugin.KickSuspectedPlayers.Value && __instance.Data.FriendCode != string.Empty && AUFilesManager.Data.entries.Count(x => x.friend_code == __instance.Data.FriendCode) > 0) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Suspected EDater/Pdf", false);
+            else if (FriendsListManager.Instance.IsPlayerBlocked(AmongUsClient.Instance.GetClient(__instance.Data.ClientId).ProductUserId)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Blocked player", false);
         })));
+        __instance.SetName(__instance.Data.PlayerName + $"({AmongUsClient.Instance.GetClient(__instance.Data.ClientId).PlatformData.PlatformName})");
         SendHUMessage(__instance);
     }
 

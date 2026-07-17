@@ -29,6 +29,7 @@ namespace HostUtility.Components
 
         private void SetUp(ChatCommand cmd)
         {
+            transform.GetChild(1).GetComponent<Button>().m_OnClick.AddListener(new System.Action(() => gameObject.Destroy()));
             command = cmd;
             text.Value.text = cmd.Command;
             parameters = new List<string>(cmd.Arguments.Count);
@@ -77,6 +78,17 @@ namespace HostUtility.Components
         private void OnDestroy()
         {
             ControllerManager.Instance.CloseOverlayMenu("ExecuteCommandMenu");
+        }
+
+        private void OnDisable()
+        {
+            gameObject.Destroy();
+        }
+
+        private void Start()
+        {
+            
+            if (OperatingSystem.IsAndroid()) GetComponent<CanvasScaler>().scaleFactor *= 0.8f;
         }
 
         public static void CreateAndShow(ChatCommand command)

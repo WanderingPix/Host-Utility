@@ -15,7 +15,7 @@ public class OptionsPatch
         {
             if (__instance.intOptionName is Int32OptionNames.Invalid) return;
             if (__instance.intOptionName is Int32OptionNames.MaxImpostors or Int32OptionNames.NumImpostors) return;
-            __instance.ValidRange = new FloatRange(0, float.MaxValue);
+            __instance.ValidRange = new FloatRange(__instance.floatOptionName == FloatOptionNames.KillCooldown ? 0.01f : 0, float.MaxValue);
         })));
     }
 }
