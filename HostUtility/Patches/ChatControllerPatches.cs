@@ -1,5 +1,6 @@
 using System.Linq;
 using HarmonyLib;
+using HostUtility.Components;
 using Reactor.Utilities;
 
 namespace HostUtility.Patches;
@@ -11,6 +12,8 @@ public class ChatControllerPatches
     [HarmonyPostfix]
     public static void ChatController_AddChat_Postfix(ChatController __instance, ref PlayerControl sourcePlayer, ref string chatText)
     {
+        var trackingDataBehaviour = sourcePlayer.GetComponent<TrackingDataBehaviour>();
+        trackingDataBehaviour.chatMessages = trackingDataBehaviour.chatMessages.Append(chatText).ToList();
         if (!AmongUsClient.Instance.AmHost) return;
 
         if (BanWords.ContainsSwear(chatText) && PluginSingleton<HostUtilityPlugin>.Instance.BanInappropriateMessages.Value)

@@ -25,6 +25,12 @@ namespace HostUtility.Components
             HudManager.Instance.StartCoroutine(Effects.ScaleIn(transform.GetChild(0), 0, 1, 0.2f));
             PopulateMods();
             PopulateCommands(ChatCommandsManager.Commands);
+            if (OperatingSystem.IsAndroid()) GetComponent<CanvasScaler>().scaleFactor *= 0.8f;
+        }
+        
+        private void OnDisable()
+        {
+            gameObject.Destroy();
         }
 
         void PopulateMods()

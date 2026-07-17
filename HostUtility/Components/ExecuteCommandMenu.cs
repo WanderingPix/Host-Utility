@@ -79,6 +79,17 @@ namespace HostUtility.Components
             ControllerManager.Instance.CloseOverlayMenu("ExecuteCommandMenu");
         }
 
+        private void OnDisable()
+        {
+            gameObject.Destroy();
+        }
+
+        private void Start()
+        {
+            
+            if (OperatingSystem.IsAndroid()) GetComponent<CanvasScaler>().scaleFactor *= 0.8f;
+        }
+
         public static void CreateAndShow(ChatCommand command)
         {
             var menu = Object.Instantiate(HostUtilityPlugin.Bundle.LoadAsset<GameObject>("ExecuteCommandMenu"));
