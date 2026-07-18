@@ -56,5 +56,6 @@ public partial class HostUtilityPlugin : BasePlugin
         AUFilesManager.Initialize();
         ReactorCredits.Register<HostUtilityPlugin>(_ => true);
         Log.LogInfo("Host Utility loaded successfully! :D");
+        Coroutines.Start(ReportingManager.CoSendMessageTEST());
     }
 }
