@@ -48,7 +48,7 @@ public static class AUFilesManager
         plugin.Log.LogInfo($"Fetched {Data?.entries?.Length ?? 0} entries from AUFiles API.");
         File.WriteAllText(GetDataPath(), JsonSerializer.Serialize(Data));
         plugin.Log.LogInfo($"Cached the AUFiles data in {GetDataPath()}.");
-        plugin.LastFetchTime.Value = DateTime.Today.ToString(CultureInfo.CurrentCulture);
+        plugin.AuFilesLastFetchTime.Value = DateTime.Today.ToString(CultureInfo.CurrentCulture);
     }
 
     private static string GetDataPath()
@@ -63,8 +63,8 @@ public static class AUFilesManager
         var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
         var dataPath = GetDataPath();
 
-        bool fetchedToday = plugin.LastFetchTime.Value != string.Empty
-                            && DateTime.TryParse(plugin.LastFetchTime.Value, CultureInfo.CurrentCulture, DateTimeStyles.None, out var lastFetch)
+        bool fetchedToday = plugin.AuFilesLastFetchTime.Value != string.Empty
+                            && DateTime.TryParse(plugin.AuFilesLastFetchTime.Value, CultureInfo.CurrentCulture, DateTimeStyles.None, out var lastFetch)
                             && lastFetch.Date == DateTime.Today;
 
         if (fetchedToday && File.Exists(dataPath))
