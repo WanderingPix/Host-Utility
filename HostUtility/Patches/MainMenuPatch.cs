@@ -1,6 +1,8 @@
 using HarmonyLib;
 using HostUtility.AUFiles;
 using HostUtility.AUOS;
+using HostUtility.BanListAPI;
+using HostUtility.BanListAPI.Providers.AUFiles;
 using HostUtility.PlayerReporting;
 using TMPro;
 using UnityEngine;
@@ -36,12 +38,6 @@ public class MainMenuPatch
         pos.DistanceFromEdge = new Vector3(14.125f, 3.15f, 0f);
         pos.AdjustPosition();
 
-        var auFilesInit = AUFilesManager.Data != null;
-        var auFilesStatus = auFilesInit ? $"<color=green>Initialized ({AUFilesManager.Data.totalCount} Entries)</color>" : "<color=yellow>Initializing...</color>";
-        text.text = $"AUFiles API Status: {auFilesStatus}";
-        
-        var auosFilesInit = AuosManager.Data != null;
-        var auosFilesStatus = auosFilesInit ? $"<color=green>Initialized ({AuosManager.Data.totalCount} Entries)</color>" : "<color=yellow>Initializing...</color>";
-        text.text += $"\nAU Online Safety API Status: {auosFilesStatus}";
+        text.text = BanListManager.GetMainMenuInfoText();
     }
 }

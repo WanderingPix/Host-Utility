@@ -15,7 +15,7 @@ public class AntiCheatPatch
     public static void PlayerControl_MurderPlayer_Postfix(PlayerControl __instance)
     {
         if (LobbyBehaviour.Instance.IsNullOrDestroyed()) return;
-        if (AmongUsClient.Instance.AmHost) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Suspected cheater (MurderPlayer called while in lobby)", true);
+        if (AmongUsClient.Instance.AmHost) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Suspected cheater (MurderPlayer called while in lobby)", "", true);
     }
     
     private static Dictionary<PlayerControl, float> MessageCooldowns = new Dictionary<PlayerControl, float>();
@@ -30,7 +30,7 @@ public class AntiCheatPatch
         }
         else if (cooldown > 0f && PluginSingleton<HostUtilityPlugin>.Instance.CheckMessageCooldowns.Value)
         {
-            AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Bypassing message cooldowns", true);
+            AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Bypassing message cooldowns", "", true);
         }
     }
     [HarmonyPatch(typeof(ChatController), nameof(ChatController.Update))]

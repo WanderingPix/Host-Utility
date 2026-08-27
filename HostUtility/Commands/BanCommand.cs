@@ -19,6 +19,6 @@ public class BanCommand : ChatCommand
         string playerName = args[0];
         var target = PlayerControl.AllPlayerControls.ToArray().First(x => x.Data.PlayerName == playerName);
         if (target == null) return;
-        AmongUsClient.Instance.KickWithReason(target.Data.ClientId, "Banned by host", true);
+        AmongUsClient.Instance.KickPlayer(AmongUsClient.Instance.GetClientFromCharacter(target).Id, true);
     }
 }

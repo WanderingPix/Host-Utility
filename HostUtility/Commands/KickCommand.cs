@@ -19,6 +19,6 @@ public class KickCommand : ChatCommand
         string playerName = args[0];
         var target = PlayerControl.AllPlayerControls.ToArray().First(x => x.Data.PlayerName == playerName);
         if (target == null) return;
-        AmongUsClient.Instance.KickWithReason(target.Data.ClientId, "Kicked by host", false);
+        AmongUsClient.Instance.KickPlayer(AmongUsClient.Instance.GetClientFromCharacter(target).Id, false);
     }
 }
