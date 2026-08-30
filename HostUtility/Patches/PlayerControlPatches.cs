@@ -39,6 +39,5 @@ public class PlayerControlPatches
             if (BanListManager.IsTargetOnBanList(AmongUsClient.Instance.GetClientFromCharacter(__instance), out string banReason, out string banListName)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, banReason, banListName, false);
             if (FriendsListManager.Instance.IsPlayerBlocked(AmongUsClient.Instance.GetClient(__instance.Data.ClientId).ProductUserId)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Blocked player", "", false);
         })));
-        __instance.SetName(__instance.Data.PlayerName + $"({AmongUsClient.Instance.GetClient(__instance.Data.ClientId).PlatformData.PlatformName})");
     }
 }

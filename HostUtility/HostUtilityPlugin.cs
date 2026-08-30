@@ -54,7 +54,7 @@ public partial class HostUtilityPlugin : BasePlugin
         ShowPlayerIDs = Config.Bind<bool>("Advanced", "Show Player IDs", false);
         ShowPlayerPlatforms = Config.Bind<bool>("Advanced", "Show Player Platforms", false);
         BanListManager.Initialize();
-        ReactorCredits.Register<HostUtilityPlugin>(_ => true);
+        ReactorCredits.Register(Name, Version + " (Beta 1)", true, _ => true);
         Log.LogInfo("Host Utility loaded successfully! :D");
     }
 }
