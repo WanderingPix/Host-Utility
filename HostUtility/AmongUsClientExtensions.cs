@@ -8,6 +8,7 @@ public static class AmongUsClientExtensions
     {
         if (!instance.AmHost) return;
         var client = AmongUsClient.Instance.GetClient(clientId);
+        if (client.Character && client.Character.AmOwner) return;
         if (FriendsListManager.Instance.IsPlayerFriend(client.ProductUserId)) return;
         AmongUsClient.Instance.KickPlayer(clientId, ban);
         if (HudManager.Instance)

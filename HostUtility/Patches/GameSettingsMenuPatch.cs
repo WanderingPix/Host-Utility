@@ -26,8 +26,8 @@ public class GameSettingsMenuPatch
         
         CreateHeader(__instance, "Moderation", ref y);
         CreateToggle(__instance, "Ban Inappropriate Names", plugin.BanInappropriateNames.Value, b => plugin.BanInappropriateNames.Value = b, ref y);
-        CreateToggle(__instance, "Ban Inappropriate Messages", plugin.BanInappropriateMessages.Value, b => plugin.BanInappropriateMessages.Value = b, ref y);
-        CreateToggle(__instance, "Kick Suspected E-Daters and PDFs", plugin.KickSuspectedPlayers.Value, b => plugin.KickSuspectedPlayers.Value = b, ref y);
+        CreateToggle(__instance, "Ban Inappropriate Messages", plugin.BanInappropriateMessages.Value,
+            b => plugin.BanInappropriateMessages.Value = b, ref y);
         CreateToggle(__instance, "Kick Suspected Bots", plugin.KickSuspectedBots.Value, b => plugin.KickSuspectedBots.Value = b, ref y);
 
         CreateHeader(__instance, "Join Conditions", ref y);

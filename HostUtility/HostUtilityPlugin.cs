@@ -17,7 +17,7 @@ using UnityEngine;
 
 namespace HostUtility;
 
-[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "1.4.0")]
+[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "2.0.0")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 public partial class HostUtilityPlugin : BasePlugin

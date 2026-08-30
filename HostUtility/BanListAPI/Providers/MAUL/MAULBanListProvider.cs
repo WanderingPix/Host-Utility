@@ -69,14 +69,16 @@ public class MAULBanListProvider : BanListProvider
 
     public override bool IsTargetOnBanList(ClientData client, out string banReason)
     {
-        if (Data.entries.Count(x => x.FriendCode == client.FriendCode) > 0)
+        try
+        {
+            var entry = Data.entries.First(x => x.FriendCode == client.FriendCode);
+            banReason = entry.Reason;
+            return true;
+        }
+        catch (Exception)
         {
             banReason = string.Empty;
             return false;
         }
-
-        var entry = Data.entries.First(x => x.FriendCode == client.FriendCode);
-        banReason = entry.Reason;
-        return true;
     }
 }

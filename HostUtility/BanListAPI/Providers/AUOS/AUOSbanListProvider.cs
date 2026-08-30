@@ -76,10 +76,16 @@ public class AUOSbanListProvider : BanListProvider
 
     public override bool IsTargetOnBanList(ClientData client, out string banReason)
     {
-        banReason = "";
-        bool isInDatabase = Data.entries.Count(x => x.Puid == client.ProductUserId) > 0;
-        if (!isInDatabase) return false;
-        var entry = Data.entries.First(x => x.Puid == client.ProductUserId);
-        return entry.Score < MinimumHonor.Value;
+        try
+        {
+            var entry = Data.entries.First(x => x.Puid == client.ProductUserId);
+            banReason = $"Honor score too low ({entry.Score}))";
+            return entry.Score < MinimumHonor.Value;
+        }
+        catch (Exception )
+        {
+            banReason = string.Empty;
+            return false;
+        }
     }
 }

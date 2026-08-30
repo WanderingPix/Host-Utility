@@ -34,28 +34,11 @@ public class PlayerControlPatches
             if (plugin.ShowPlayerIDs.Value) __instance.cosmetics.nameText.text += $" (ID: {__instance.PlayerId})";
             
             if (BanWords.ContainsSwear(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Inappropriate username", "",true);
-            else if (BotNames.Names.Contains(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Bot Player", "",true);
-            else if (__instance.Data.PlayerLevel < plugin.MinLevel.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Low level", "",false);
-            else if (BanListManager.IsTargetOnBanList(AmongUsClient.Instance.GetClientFromCharacter(__instance), out string banReason, out string banListName)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, banReason, banListName, false);
-            else if (FriendsListManager.Instance.IsPlayerBlocked(AmongUsClient.Instance.GetClient(__instance.Data.ClientId).ProductUserId)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Blocked player", "", false);
+            if (BotNames.Names.Contains(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Bot Player", "",true);
+            if (__instance.Data.PlayerLevel < plugin.MinLevel.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Low level", "",false);
+            if (BanListManager.IsTargetOnBanList(AmongUsClient.Instance.GetClientFromCharacter(__instance), out string banReason, out string banListName)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, banReason, banListName, false);
+            if (FriendsListManager.Instance.IsPlayerBlocked(AmongUsClient.Instance.GetClient(__instance.Data.ClientId).ProductUserId)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Blocked player", "", false);
         })));
         __instance.SetName(__instance.Data.PlayerName + $"({AmongUsClient.Instance.GetClient(__instance.Data.ClientId).PlatformData.PlatformName})");
-        SendHUMessage(__instance);
-    }
-
-    private static void SendHUMessage(PlayerControl target)
-    {
-        if (target.AmOwner) return;
-        var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
-        string message = $"<size=130%>This Lobby is running using Host Utility!{HostUtilityPlugin.Version}</size>\n" + 
-                                                                              "Currently set options:\n" + 
-                                                                              $"- Chat Message Filtering: {plugin.BanInappropriateMessages.Value}\n" +
-                                                                              $"- Player Names Filtering: {plugin.BanInappropriateNames.Value}\n" +
-                                                                              $"- Minimum Level required to play: {plugin.MinLevel.Value}\n" + 
-                                                                              $"- Kick suspected e-daters and predators: {plugin.KickSuspectedPlayers.Value}" +
-                                                                              $"- Game Start countdown time: {plugin.GameStartCountdownTime.Value}";
-        var rpc = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)RpcCalls.SendChat, SendOption.Reliable, (int)target.NetId);
-        rpc.Write(message);
-        AmongUsClient.Instance.FinishRpcImmediately(rpc);
     }
 }
