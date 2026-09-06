@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using AmongUs.GameOptions;
 using HarmonyLib;
+using HostUtility.Components;
+using InnerNet;
 using Reactor.Utilities;
 using Rewired.Utils;
 using UnityEngine;
@@ -14,8 +16,75 @@ public class AntiCheatPatch
     [HarmonyPostfix]
     public static void PlayerControl_MurderPlayer_Postfix(PlayerControl __instance)
     {
-        if (LobbyBehaviour.Instance.IsNullOrDestroyed()) return;
-        if (AmongUsClient.Instance.AmHost) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Suspected cheater (MurderPlayer called while in lobby)", "", true);
+        if (!AmongUsClient.Instance.AmHost) return;
+        var trackingData = __instance.GetComponent<TrackingDataBehaviour>();
+        if (trackingData.timeSinceLastMurder < 0.25f)
+        {
+            AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Spamming murder player RPC", "", true);
+        }
+        else trackingData.timeSinceLastMurder = 0;
+        if (LobbyBehaviour.Instance) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Attempting to murder player in lobby", "", true);
+    }
+    
+    [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetColor))]
+    [HarmonyPostfix]
+    public static void PlayerControl_SetColor_Postfix(PlayerControl __instance)
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        var trackingData = __instance.GetComponent<TrackingDataBehaviour>();
+        if (trackingData.timeSinceLastSetColor < 0.25f)
+        {
+            AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Spamming set color RPC", "", true);
+        }
+        else trackingData.timeSinceLastSetColor = 0;
+    }
+    
+    [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.UpdateSystem))]
+    [HarmonyPostfix]
+    public static void ShipStatus_UpdateSystem_Postfix(ShipStatus __instance, ref SystemTypes systemType, ref PlayerControl player)
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        var trackingData = player.GetComponent<TrackingDataBehaviour>();
+        if (trackingData.timeSinceLastUpdateSystem < 0.25f)
+        {
+            AmongUsClient.Instance.KickWithReason(player.Data.ClientId, "Spamming update system RPC", "", true);
+        }
+        else trackingData.timeSinceLastUpdateSystem = 0;
+    }
+
+    [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
+    public static bool PlayerControl_ReportDeadBody_Postfix(PlayerControl __instance)
+    {
+        var amongUsClient = AmongUsClient.Instance;
+        if (!amongUsClient.AmHost) return true;
+        
+        bool isCheating = false;
+        string reason = "";
+        if (LobbyBehaviour.Instance)
+        {
+            isCheating = true;
+            reason = "Attempting to call meeting in lobby";
+        }
+        else if (amongUsClient.GameState == InnerNetClient.GameStates.Started)
+        {
+            if (GameManager.Instance.IsHideAndSeek())
+            {
+                isCheating = true;
+                reason = "Attempting to call meeting in HnS";
+            }
+
+            if (MeetingHud.Instance)
+            {
+                isCheating = true;
+                reason = "Attempting to call meeting in a meeting";
+            }
+        }
+
+        if (isCheating)
+        {
+            amongUsClient.KickWithReason(__instance.Data.ClientId, reason, "", true);
+        }
+        return !isCheating;
     }
     
     private static Dictionary<PlayerControl, float> MessageCooldowns = new Dictionary<PlayerControl, float>();
