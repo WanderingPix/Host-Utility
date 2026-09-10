@@ -39,18 +39,18 @@ public class AntiCheatPatch
         else trackingData.timeSinceLastSetColor = 0;
     }
     
-    [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.UpdateSystem))]
-    [HarmonyPostfix]
-    public static void ShipStatus_UpdateSystem_Postfix(ShipStatus __instance, ref SystemTypes systemType, ref PlayerControl player)
-    {
-        if (!AmongUsClient.Instance.AmHost) return;
-        var trackingData = player.GetComponent<TrackingDataBehaviour>();
-        if (trackingData.timeSinceLastUpdateSystem < 0.25f)
-        {
-            AmongUsClient.Instance.KickWithReason(player.Data.ClientId, "Spamming update system RPC", "", true);
-        }
-        else trackingData.timeSinceLastUpdateSystem = 0;
-    }
+    //[HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.UpdateSystem))]
+    //[HarmonyPostfix]
+    //public static void ShipStatus_UpdateSystem_Postfix(ShipStatus __instance, ref SystemTypes systemType, ref PlayerControl player, ref byte amount)
+    //{
+    //    if (!AmongUsClient.Instance.AmHost) return;
+    //    var trackingData = player.GetComponent<TrackingDataBehaviour>();
+    //    if (trackingData.timeSinceLastUpdateSystem < 0.25f)
+    //    {
+    //        AmongUsClient.Instance.KickWithReason(player.Data.ClientId, "Spamming update system RPC", "", true);
+    //    }
+    //    else trackingData.timeSinceLastUpdateSystem = 0;
+    //}
 
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
     public static bool PlayerControl_ReportDeadBody_Postfix(PlayerControl __instance)
@@ -77,6 +77,18 @@ public class AntiCheatPatch
             {
                 isCheating = true;
                 reason = "Attempting to call meeting in a meeting";
+            }
+            
+            if (IntroCutscene.Instance)
+            {
+                isCheating = true;
+                reason = "Attempting to call meeting in intro cutscene";
+            }
+            
+            if (PlayerControl.LocalPlayer.Data.Role == null)
+            {
+                isCheating = true;
+                reason = "Attempting to call meeting before role gen";
             }
         }
 
