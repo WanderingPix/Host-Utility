@@ -12,6 +12,8 @@ namespace HostUtility.Patches;
 [HarmonyPatch]
 public class AntiCheatPatch
 {
+    // Lobby murder & murder spam anticheat
+    
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
     [HarmonyPostfix]
     public static void PlayerControl_MurderPlayer_Postfix(PlayerControl __instance)
@@ -25,6 +27,8 @@ public class AntiCheatPatch
         else trackingData.timeSinceLastMurder = 0;
         if (LobbyBehaviour.Instance) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Attempting to murder player in lobby", "", true);
     }
+    
+    // SetColor spam anticheat
     
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetColor))]
     [HarmonyPostfix]
@@ -52,6 +56,8 @@ public class AntiCheatPatch
         else trackingData.timeSinceLastUpdateSystem = 0;
     }
 
+    // Meeting-call anticheat
+    
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
     public static bool PlayerControl_ReportDeadBody_Postfix(PlayerControl __instance)
     {
@@ -113,5 +119,20 @@ public class AntiCheatPatch
             newCooldowns.Add(data.Key, data.Value - Time.deltaTime);
         }
         MessageCooldowns = newCooldowns;
+    }
+    
+    // Prevent any kicks against host from any source, including votekick
+    
+    [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.KickPlayer))]
+    [HarmonyPrefix]
+    public static bool KickPlayer_Prefix(InnerNetClient __instance, int clientId, bool ban)
+    {
+        if (!__instance.AmHost) return false;
+        if (!(clientId == __instance.ClientId))
+        {
+            Logger<HostUtilityPlugin>.Warning("Preventing kick against host!");
+            return false;
+        }
+        return !(clientId == __instance.ClientId);
     }
 }
