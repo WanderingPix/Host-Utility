@@ -120,6 +120,34 @@ public class AntiCheatPatch
             AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Bypassing message cooldowns", "", true);
         }
     }
+
+    //Checks RPCs sent for cheat menus.
+    private static Dictionary<byte, string> CheatRpcDictionary = new()
+    {
+        { 202, "SlopMenuCrew" },
+        { 201, "SlopMenuCrew" },
+        { 121, "ChocooMenu" },
+        { 250, "KillNetwork" },
+        { 101, "SickoMenu" },
+        { 164, "SickoMenu" },
+        { 85, "AmongUsMenu" }
+    };
+    
+    [HarmonyPatch(nameof(PlayerControl.HandleRpc))]
+    [HarmonyPostfix]
+    public static void PlayerControl_HandleRpc_Prefix(PlayerControl __instance, ref byte callId, ref MessageReader reader)
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        foreach (byte cheatCallId in CheatRpcDictionary.Keys)
+        {
+            if (callId == cheatCallId)
+            {
+                CheatRpcDictionary.TryGetValue(cheatCallId, out string cheatName) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "using " + cheatName, "", true);
+                return;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(ChatController), nameof(ChatController.Update))]
     [HarmonyPostfix]
     public static void ChatController_Update_Postfix()
