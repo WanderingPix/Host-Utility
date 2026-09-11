@@ -3,6 +3,7 @@ using AmongUs.GameOptions;
 using HarmonyLib;
 using HostUtility.Components;
 using InnerNet;
+using Hazel;
 using Reactor.Utilities;
 using Rewired.Utils;
 using UnityEngine;
