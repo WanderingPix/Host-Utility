@@ -142,7 +142,7 @@ public class AntiCheatPatch
         {
             if (callId == cheatCallId)
             {
-                CheatRpcDictionary.TryGetValue(cheatCallId, out string cheatName) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "using " + cheatName, "", true);
+                if (CheatRpcDictionary.TryGetValue(cheatCallId, out string cheatName)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "using " + cheatName, "", true);
                 return;
             }
         }
