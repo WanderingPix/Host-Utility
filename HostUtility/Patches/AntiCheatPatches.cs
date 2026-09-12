@@ -134,7 +134,7 @@ public class AntiCheatPatch
         { 85, "AmongUsMenu" }
     };
     
-    [HarmonyPatch(nameof(PlayerControl.HandleRpc))]
+    [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
     [HarmonyPostfix]
     public static void PlayerControl_HandleRpc_Prefix(PlayerControl __instance, ref byte callId, ref MessageReader reader)
     {
