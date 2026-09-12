@@ -20,6 +20,9 @@ public class PlayerReportData
     
     [JsonPropertyName("reporterPlatform")]
     public string ReporterPlatform { get; set; }
+    
+    [JsonPropertyName("reporterColor")]
+    public string ReporterColor { get; set; }
 
     [JsonPropertyName("reportedName")]
     public string ReportedName { get; set; }
@@ -35,4 +38,7 @@ public class PlayerReportData
     
     [JsonPropertyName("reportedPlatform")]
     public string ReportedPlatform { get; set; }
+    
+    [JsonPropertyName("reportedColor")]
+    public string ReportedColor { get; set; }
 }
