@@ -73,6 +73,15 @@ public class GameSettingsMenuPatch
                 icon.IdIcon.SetActive(b);
             }
         }, ref y);
+        
+        CreateToggle(__instance, "Show Player Levels", plugin.ShowPlayerLevels.Value, b =>
+        {
+            plugin.ShowPlayerLevels.Value = b;
+            foreach (var icon in PlayerIconsBehaviour.AllIcons)
+            {
+                icon.LevelIcon.SetActive(b);
+            }
+        }, ref y);
 
         FixScroller(__instance, y);
     }
