@@ -20,10 +20,10 @@ public class AntiCheatPatch
         var trackingData = __instance.GetComponent<TrackingDataBehaviour>();
         if (trackingData.timeSinceLastMurder < 0.25f)
         {
-            AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Spamming murder player RPC", "", true);
+            AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Spamming murder player RPC", true);
         }
         else trackingData.timeSinceLastMurder = 0;
-        if (LobbyBehaviour.Instance) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Attempting to murder player in lobby", "", true);
+        if (LobbyBehaviour.Instance) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Attempting to murder player in lobby", true);
     }
     
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetColor))]
@@ -34,7 +34,7 @@ public class AntiCheatPatch
         var trackingData = __instance.GetComponent<TrackingDataBehaviour>();
         if (trackingData.timeSinceLastSetColor < 0.25f)
         {
-            AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Spamming set color RPC", "", true);
+            AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Spamming set color RPC", true);
         }
         else trackingData.timeSinceLastSetColor = 0;
     }
@@ -94,7 +94,7 @@ public class AntiCheatPatch
 
         if (isCheating)
         {
-            amongUsClient.KickWithReason(__instance.Data.ClientId, reason, "", true);
+            amongUsClient.KickWithReason(__instance.Data.ClientId, reason, true);
         }
         return !isCheating;
     }
@@ -111,7 +111,7 @@ public class AntiCheatPatch
         }
         else if (cooldown > 0f && PluginSingleton<HostUtilityPlugin>.Instance.CheckMessageCooldowns.Value)
         {
-            AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Bypassing message cooldowns", "", true);
+            AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Bypassing message cooldowns", true);
         }
     }
     [HarmonyPatch(typeof(ChatController), nameof(ChatController.Update))]

@@ -7,7 +7,9 @@ using HostUtility.AUFiles;
 using HostUtility.BanListAPI;
 using HostUtility.BanListAPI.Providers.AUFiles;
 using HostUtility.Components;
+using Il2CppSystem;
 using Reactor.Utilities;
+using UnityEngine;
 
 namespace HostUtility.Patches;
 
@@ -18,6 +20,12 @@ public class PlayerControlPatches
     [HarmonyPostfix]
     public static void PlayerControl_Start_Postfix(PlayerControl __instance)
     {
+        var iconContainer = new GameObject("IconContainer");
+        iconContainer.transform.SetParent(__instance.cosmetics.nameTextContainer.transform);
+        iconContainer.transform.localPosition = __instance.cosmetics.nameText.transform.localPosition + new Vector3(0, 0.35f, 0);
+        __instance.StartCoroutine(Effects.ActionAfterDelay(0.25f,
+            new System.Action(() => iconContainer.AddComponent<PlayerIconsBehaviour>().Initialize(__instance))));
+        
         __instance.gameObject.AddComponent<TrackingDataBehaviour>().myPlayer = __instance;
         if (!AmongUsClient.Instance.AmHost) return;
         var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
@@ -25,21 +33,13 @@ public class PlayerControlPatches
         __instance.StartCoroutine(Effects.ActionAfterDelay(1f, new System.Action(() =>
         {
             if (__instance == PlayerControl.LocalPlayer) return;
-            if (plugin.ShowPlayerPlatforms.Value)
-            {
-                var platformName = AmongUsClient.Instance.GetClientFromCharacter(__instance).PlatformData.PlatformName;
-                if (platformName == "112") platformName = "Starlight Mobile";
-                if (platformName == "TESTNAME") platformName = "Unknown";
-                __instance.cosmetics.nameText.text += $" ({platformName})";
-            }
-            if (plugin.ShowPlayerIDs.Value) __instance.cosmetics.nameText.text += $" (ID: {__instance.PlayerId})";
             
-            if (BanWords.ContainsSwear(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Inappropriate username", "",true);
-            if (BotNames.Names.Contains(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Bot Player", "",true);
+            if (BanWords.ContainsSwear(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Inappropriate username",true);
+            if (BotNames.Names.Contains(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Bot Player",true);
             if (RemoveInvisibleCharacters(__instance.Data.PlayerName).Trim() == string.Empty) __instance.RpcSetName("Unknown Player");
-            if (__instance.Data.PlayerLevel < plugin.MinLevel.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Low level", "",false);
+            if (__instance.Data.PlayerLevel < plugin.MinLevel.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Low level",false);
             if (BanListManager.IsTargetOnBanList(AmongUsClient.Instance.GetClientFromCharacter(__instance), out string banReason, out string banListName)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, banReason, banListName, false);
-            if (FriendsListManager.Instance.IsPlayerBlocked(AmongUsClient.Instance.GetClient(__instance.Data.ClientId).ProductUserId)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Blocked player", "", false);
+            if (FriendsListManager.Instance.IsPlayerBlocked(AmongUsClient.Instance.GetClient(__instance.Data.ClientId).ProductUserId)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Blocked player", false);
         })));
     }
 

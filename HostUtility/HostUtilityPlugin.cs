@@ -26,11 +26,11 @@ public partial class HostUtilityPlugin : BasePlugin
     public ConfigEntry<int> GameStartCountdownTime;
     public ConfigEntry<bool> BanInappropriateNames;
     public ConfigEntry<bool> BanInappropriateMessages;
-    public ConfigEntry<bool> KickSuspectedPlayers;
     public ConfigEntry<bool> CheckMessageCooldowns;
     public ConfigEntry<bool> KickSuspectedBots;
     public ConfigEntry<bool> ShowPlayerIDs;
     public ConfigEntry<bool> ShowPlayerPlatforms;
+    public ConfigEntry<bool> ShowPlayerLevels;
     
     public static AssetBundle Bundle;
     public Harmony Harmony { get; } = new(Id);
@@ -44,7 +44,6 @@ public partial class HostUtilityPlugin : BasePlugin
         MinLevel = Config.Bind<int>("Join Conditions", "Minimum Level", 0);
         BanInappropriateNames = Config.Bind<bool>("Join Conditions", "Ban Inappropriate Names", true);
         BanInappropriateMessages = Config.Bind<bool>("Join Conditions", "Ban Inappropriate Messages", true);
-        KickSuspectedPlayers = Config.Bind<bool>("Join Conditions", "Kick Suspected E-Daters and PDFs", true);
         KickSuspectedBots = Config.Bind<bool>("Join Conditions", "Kick Suspected Bots", true);
         
         CheckMessageCooldowns = Config.Bind<bool>("Anticheat", "Force message cooldowns", true);
@@ -52,9 +51,12 @@ public partial class HostUtilityPlugin : BasePlugin
         GameStartCountdownTime = Config.Bind("Game", "Game Start Countdown Time", 5);
         
         ShowPlayerIDs = Config.Bind<bool>("Advanced", "Show Player IDs", false);
-        ShowPlayerPlatforms = Config.Bind<bool>("Advanced", "Show Player Platforms", false);
+        ShowPlayerPlatforms = Config.Bind<bool>("Advanced", "Show Player Platforms", true);
+        ShowPlayerPlatforms = Config.Bind<bool>("Advanced", "Show Player Platforms", true);
+        ShowPlayerLevels = Config.Bind<bool>("Advanced", "Show Player Levels", true);
+        
         BanListManager.Initialize();
-        ReactorCredits.Register(Name, Version + " (Beta 1)", true, _ => true);
+        ReactorCredits.Register(Name, Version + " (Beta 2)", true, _ => true);
         Log.LogInfo("Host Utility loaded successfully! :D");
     }
 }

@@ -20,4 +20,19 @@ public static class AmongUsClientExtensions
                                                     optionalText2);
         }
     }
+    
+    public static void KickWithReason(this AmongUsClient instance, int clientId, string reason, bool ban)
+    {
+        if (!instance.AmHost) return;
+        var client = AmongUsClient.Instance.GetClient(clientId);
+        if (client.Character && client.Character.AmOwner) return;
+        if (FriendsListManager.Instance.IsPlayerFriend(client.ProductUserId)) return;
+        AmongUsClient.Instance.KickPlayer(clientId, ban);
+        if (HudManager.Instance)
+        {
+            string punishment = ban ? "banned" : "kicked";
+            HudManager.Instance.Chat.AddChatWarning($"A player has been {punishment}.<size=60%>" +
+                                                    $"Reason: {reason}");
+        }
+    }
 }

@@ -4,6 +4,7 @@ using AmongUs.GameOptions;
 using BepInEx.Configuration;
 using HarmonyLib;
 using HostUtility.BanListAPI;
+using HostUtility.Components;
 using MonoMod.Utils;
 using Reactor.Utilities;
 using TMPro;
@@ -59,27 +60,17 @@ public class GameSettingsMenuPatch
         CreateToggle(__instance, "Show Player Platforms", plugin.ShowPlayerPlatforms.Value, b =>
         {
             plugin.ShowPlayerPlatforms.Value = b;
-            foreach (var p in PlayerControl.AllPlayerControls)
+            foreach (var icon in PlayerIconsBehaviour.AllIcons)
             {
-                p.cosmetics.nameText.text = p.Data.PlayerName;
-                if (plugin.ShowPlayerPlatforms.Value) p.cosmetics.nameText.text += $" ({AmongUsClient.Instance.GetClientFromCharacter(p).PlatformData.Platform.ToString().SpacedPascalCase()})";
-                if (plugin.ShowPlayerIDs.Value) p.cosmetics.nameText.text += $" (ID: {p.PlayerId})";
+                icon.PlatformIcon.SetActive(b);
             }
         }, ref y);
         CreateToggle(__instance, "Show Player IDs", plugin.ShowPlayerIDs.Value, b =>
         {
             plugin.ShowPlayerIDs.Value = b;
-            foreach (var p in PlayerControl.AllPlayerControls)
+            foreach (var icon in PlayerIconsBehaviour.AllIcons)
             {
-                p.cosmetics.nameText.text = p.Data.PlayerName;
-                if (plugin.ShowPlayerPlatforms.Value)
-                {
-                    var platformName = AmongUsClient.Instance.GetClientFromCharacter(p).PlatformData.PlatformName;
-                    if (platformName == "112") platformName = "Starlight Mobile";
-                    if (platformName == "TESTNAME") platformName = "Unknown";
-                    p.cosmetics.nameText.text += $" ({platformName})";
-                }
-                if (plugin.ShowPlayerIDs.Value) p.cosmetics.nameText.text += $" (ID: {p.PlayerId})";
+                icon.IdIcon.SetActive(b);
             }
         }, ref y);
 
