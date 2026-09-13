@@ -21,11 +21,13 @@ public class ReportingManager
             ReporterFriendCode = PlayerControl.LocalPlayer.Data.FriendCode,
             ReporterLogs = TrackingDataBehaviour.Local.chatMessages.ToArray(),
             ReporterPlatform = AmongUsClient.Instance.GetClientFromCharacter(PlayerControl.LocalPlayer).PlatformData.PlatformName,
+            ReporterColor = PlayerControl.LocalPlayer.Data.ColorName,
             ReportedName = target.Data.PlayerName,
             ReportedPuid = target.Data.Puid,
             ReportedFriendCode = target.Data.FriendCode,
             ReportedLogs = target.gameObject.GetComponent<TrackingDataBehaviour>().chatMessages.ToArray(),
             ReportedPlatform = AmongUsClient.Instance.GetClientFromCharacter(target).PlatformData.PlatformName,
+            ReportedColor = target.Data.ColorName,
         };
         Coroutines.Start(CoSendMessage(reportData));
     }

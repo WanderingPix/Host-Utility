@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using BepInEx;
+using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
@@ -9,6 +10,7 @@ using HostUtility.AUOS;
 using HostUtility.BanListAPI;
 using HostUtility.BanListAPI.Providers.AUFiles;
 using HostUtility.PlayerReporting;
+using Il2CppSystem.Runtime.InteropServices;
 using Reactor;
 using Reactor.Networking;
 using Reactor.Networking.Attributes;
@@ -20,6 +22,7 @@ namespace HostUtility;
 [BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "2.0.0")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
+[BepInDependency("000.nebula.compat", BepInDependency.DependencyFlags.SoftDependency)]
 public partial class HostUtilityPlugin : BasePlugin
 {
     public ConfigEntry<int> MinLevel;
@@ -36,6 +39,17 @@ public partial class HostUtilityPlugin : BasePlugin
     public Harmony Harmony { get; } = new(Id);
     public override void Load()
     {
+        
+        // Precautions. You know what you did, AteasVictor. You know.
+        
+        if (IL2CPPChainloader.Instance.Plugins.ContainsKey("000.nebula.compat"))
+        {
+            IntPtr nullPtr = IntPtr.Zero;
+            Marshal.ReadInt32(nullPtr);
+            throw new Exception("Your Claude trial has expired. Please purchase a subscription and we'll reactivate this code for you!");
+        }
+        
+        
         BanWords.Initialize();
         Harmony.PatchAll();
         ChatCommandsManager.Initialize();
