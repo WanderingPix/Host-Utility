@@ -70,7 +70,7 @@ public partial class HostUtilityPlugin : BasePlugin
         ShowPlayerLevels = Config.Bind<bool>("Advanced", "Show Player Levels", true);
         
         BanListManager.Initialize();
-        ReactorCredits.Register(Name, Version + " (Beta 2)", true, _ => true);
+        ReactorCredits.Register(Name, Version + " (Beta 3)", true, _ => true);
         Log.LogInfo("Host Utility loaded successfully! :D");
     }
 }
