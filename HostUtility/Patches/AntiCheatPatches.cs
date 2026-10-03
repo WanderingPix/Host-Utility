@@ -174,6 +174,7 @@ public class AntiCheatPatch
             Logger<HostUtilityPlugin>.Warning("Preventing kick against host!");
             return false;
         }
-        return !(clientId == __instance.ClientId);
+return true; 
+        //return !(clientId == __instance.ClientId); TODO Fix this patch.
     }
 }
