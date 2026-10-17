@@ -161,20 +161,4 @@ public class AntiCheatPatch
         }
         MessageCooldowns = newCooldowns;
     }
-    
-    // Prevent any kicks against host from any source, including votekick
-    
-    [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.KickPlayer))]
-    [HarmonyPrefix]
-    public static bool KickPlayer_Prefix(InnerNetClient __instance, int clientId, bool ban)
-    {
-        if (!__instance.AmHost) return false;
-        if (!(clientId == __instance.ClientId))
-        {
-            Logger<HostUtilityPlugin>.Warning("Preventing kick against host!");
-            return false;
-        }
-return true; 
-        //return !(clientId == __instance.ClientId); TODO Fix this patch.
-    }
 }
