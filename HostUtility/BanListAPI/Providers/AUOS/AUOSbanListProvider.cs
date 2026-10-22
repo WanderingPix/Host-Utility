@@ -8,7 +8,7 @@ using System.Text.Json;
 using BepInEx.Configuration;
 using HostUtility.AUOS.API;
 using InnerNet;
-using Reactor.Utilities;
+
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -24,7 +24,7 @@ public class AUOSbanListProvider : BanListProvider
     public override void Initialize()
     {
         MinimumHonor =
-            PluginSingleton<HostUtilityPlugin>.Instance.Config.Bind("Ban List Providers - " + Name, "Minimum Honor", 40f);
+            HostUtilityPlugin.Instance.Config.Bind("Ban List Providers - " + Name, "Minimum Honor", 40f);
         Settings.Add(MinimumHonor);
         base.Initialize();
     }
@@ -32,7 +32,7 @@ public class AUOSbanListProvider : BanListProvider
     public override IEnumerator CoLoadFromCloud()
     {
         State = ProviderState.Uninitialized;
-        var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
+        var plugin = HostUtilityPlugin.Instance;
         plugin.Log.LogInfo("Began request to AUOS API for player registry.");
 
         var request = UnityWebRequest.Get("https://orftdpwzariqxnovqgtu.supabase.co/rest/v1/players");

@@ -7,6 +7,8 @@ public abstract class ChatCommand
 {
     public abstract string Command { get; }
     public abstract string Description { get; }
+    public virtual bool HostOnly => false;
+    public virtual bool AllowMidGame => false;
     public abstract List<CommandArgument> Arguments { get; }
     public abstract void Execute(string[] args);
 

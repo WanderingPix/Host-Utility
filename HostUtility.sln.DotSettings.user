@@ -17,5 +17,6 @@
   &lt;Assembly Path="/home/pix/Downloads/SG.Airlock.dll" /&gt;
   &lt;Assembly Path="/home/pix/Downloads/Assembly-CSharp-2026.6.5.dll" /&gt;
   &lt;Assembly Path="/home/pix/Downloads/Assembly-CSharp-2026.8.18.dll" /&gt;
+  &lt;Assembly Path="/home/pix/.nuget/packages/ventframework/1.2.4.2/lib/net6.0/VentFramework.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/SolBuilderDuo/CustomGlobalProperties/=AmongUs/@EntryIndexedValue">/home/pix/.local/share/starlight/profiles/rfs-1778955947386</s:String></wpf:ResourceDictionary>

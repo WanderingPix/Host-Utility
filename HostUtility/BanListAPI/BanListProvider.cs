@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using BepInEx.Configuration;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HostUtility.AUOS.API;
 using InnerNet;
-using Reactor.Utilities;
+
 using UnityEngine;
 
 namespace HostUtility.BanListAPI;
@@ -30,9 +31,9 @@ public abstract class BanListProvider
     public virtual void Initialize()
     {
         LastFetchTime =
-            PluginSingleton<HostUtilityPlugin>.Instance.Config.Bind("Ban List Providers - " + Name, "Last Fetch Time",
+            HostUtilityPlugin.Instance.Config.Bind("Ban List Providers - " + Name, "Last Fetch Time",
                 "");
-        IsEnabled = PluginSingleton<HostUtilityPlugin>.Instance.Config.Bind("Ban List Providers - " + Name,
+        IsEnabled = HostUtilityPlugin.Instance.Config.Bind("Ban List Providers - " + Name,
             "Is Enabled", true);
         var dataPath = GetCachedDataPath();
 
@@ -55,7 +56,7 @@ public abstract class BanListProvider
             }
         }
 
-        Coroutines.Start(CoLoadFromCloud());
+        AmongUsClient.Instance.StartCoroutine(CoLoadFromCloud().WrapToIl2Cpp());
     }
 
     public abstract void LoadFromCache();

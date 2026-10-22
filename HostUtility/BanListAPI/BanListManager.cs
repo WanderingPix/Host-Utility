@@ -1,16 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using BepInEx.Configuration;
-using HostUtility.AUFiles.API;
-using HostUtility.AUOS.API;
 using InnerNet;
-using Reactor.Utilities;
-using UnityEngine;
 
 namespace HostUtility.BanListAPI;
 

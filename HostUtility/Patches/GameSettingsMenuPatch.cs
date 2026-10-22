@@ -5,9 +5,6 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using HostUtility.BanListAPI;
 using HostUtility.Components;
-using MonoMod.Utils;
-using Reactor.Utilities;
-using TMPro;
 using UnityEngine;
 
 namespace HostUtility.Patches;
@@ -19,7 +16,7 @@ public class GameSettingsMenuPatch
     [HarmonyPostfix]
     public static void GameSettingMenu_Start_Postfix(GameOptionsMenu __instance)
     {
-        var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
+        var plugin = HostUtilityPlugin.Instance;
         float y = GetLowestActiveY(__instance);
         
         CreateHeader(__instance, "Anti Cheat", ref y);
@@ -81,6 +78,13 @@ public class GameSettingsMenuPatch
             {
                 icon.LevelIcon.SetActive(b);
             }
+        }, ref y);
+
+        CreateToggle(__instance, "<color=red>Game End Behaviour</color>", plugin.GameEndEnabled.Value, b =>
+        {
+            plugin.GameEndEnabled.Value = b;
+            GameManager.Instance.gameObject.SetActive(b);
+            if (!b) HudManager.Instance.Notifier.AddDisconnectMessage("<b>Game End has been DISABLED</b>, the game will not end normally.");
         }, ref y);
 
         FixScroller(__instance, y);

@@ -1,12 +1,9 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Text;
-using HostUtility.AUFiles.API;
 using UnityEngine.Networking;
 using System.Text.Json;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HostUtility.Components;
-using Reactor.Utilities;
 
 namespace HostUtility.PlayerReporting;
 
@@ -29,7 +26,7 @@ public class ReportingManager
             ReportedPlatform = AmongUsClient.Instance.GetClientFromCharacter(target).PlatformData.PlatformName,
             ReportedColor = target.Data.ColorName,
         };
-        Coroutines.Start(CoSendMessage(reportData));
+        AmongUsClient.Instance.StartCoroutine(CoSendMessage(reportData).WrapToIl2Cpp());
     }
     private static IEnumerator CoSendMessage(PlayerReportData report)
     {

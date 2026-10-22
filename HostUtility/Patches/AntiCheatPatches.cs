@@ -1,11 +1,8 @@
 using System.Collections.Generic;
-using AmongUs.GameOptions;
 using HarmonyLib;
 using HostUtility.Components;
 using InnerNet;
 using Hazel;
-using Reactor.Utilities;
-using Rewired.Utils;
 using UnityEngine;
 
 namespace HostUtility.Patches;
@@ -116,7 +113,7 @@ public class AntiCheatPatch
         {
             MessageCooldowns.Add(sourcePlayer, 0);
         }
-        else if (cooldown > 0f && PluginSingleton<HostUtilityPlugin>.Instance.CheckMessageCooldowns.Value)
+        else if (cooldown > 0f && HostUtilityPlugin.Instance.CheckMessageCooldowns.Value)
         {
             AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Bypassing message cooldowns", true);
         }
@@ -160,20 +157,5 @@ public class AntiCheatPatch
             newCooldowns.Add(data.Key, data.Value - Time.deltaTime);
         }
         MessageCooldowns = newCooldowns;
-    }
-    
-    // Prevent any kicks against host from any source, including votekick
-    
-    [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.KickPlayer))]
-    [HarmonyPrefix]
-    public static bool KickPlayer_Prefix(InnerNetClient __instance, int clientId, bool ban)
-    {
-        if (!__instance.AmHost) return false;
-        if (!(clientId == __instance.ClientId))
-        {
-            Logger<HostUtilityPlugin>.Warning("Preventing kick against host!");
-            return false;
-        }
-        return !(clientId == __instance.ClientId);
     }
 }

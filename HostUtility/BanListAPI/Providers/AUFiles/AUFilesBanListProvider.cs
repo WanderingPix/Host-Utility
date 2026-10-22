@@ -9,7 +9,7 @@ using BepInEx.Configuration;
 using HostUtility.AUFiles.API;
 using HostUtility.BanListAPI.Providers.AUFiles.API;
 using InnerNet;
-using Reactor.Utilities;
+
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -32,7 +32,7 @@ public class AuFilesBanListProvider : BanListProvider
 
     public override IEnumerator CoLoadFromCloud()
     {
-        var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
+        var plugin = HostUtilityPlugin.Instance;
         plugin.Log.LogInfo("Began request to AUFiles API for player registry.");
 
         var request = UnityWebRequest.Get(

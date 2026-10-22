@@ -10,7 +10,8 @@ public static class AmongUsClientExtensions
         var client = AmongUsClient.Instance.GetClient(clientId);
         if (client.Character && client.Character.AmOwner) return;
         if (FriendsListManager.Instance.IsPlayerFriend(client.ProductUserId)) return;
-        AmongUsClient.Instance.KickPlayer(clientId, ban);
+        string properReason = reason.IsNullOrWhiteSpace() ? "None given" : reason;
+        AmongUsClient.Instance.KickWithReason(clientId, $"You were kicked for being on the \n{banListName} player ban list.\n Reason: {properReason}" + reason, ban);
         if (HudManager.Instance)
         {
             string punishment = ban ? "banned" : "kicked";
@@ -27,7 +28,7 @@ public static class AmongUsClientExtensions
         var client = AmongUsClient.Instance.GetClient(clientId);
         if (client.Character && client.Character.AmOwner) return;
         if (FriendsListManager.Instance.IsPlayerFriend(client.ProductUserId)) return;
-        AmongUsClient.Instance.KickPlayer(clientId, ban);
+        AmongUsClient.Instance.KickWithReason(clientId, reason, ban);
         if (HudManager.Instance)
         {
             string punishment = ban ? "banned" : "kicked";

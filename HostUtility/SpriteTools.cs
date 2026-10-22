@@ -1,6 +1,6 @@
 using System;
 using System.Reflection;
-using Reactor.Utilities.Extensions;
+using Cpp2IL.Core.Extensions;
 using UnityEngine;
 
 namespace HostUtility;
@@ -26,7 +26,7 @@ public static class SpriteTools
         var myStream = assembly.GetManifestResourceStream(resourcePath);
         if (myStream != null)
         {
-            var buttonTexture = myStream.ReadFully();
+            var buttonTexture = myStream.ReadBytes();
             tex.LoadImage(buttonTexture, false);
         }
         else

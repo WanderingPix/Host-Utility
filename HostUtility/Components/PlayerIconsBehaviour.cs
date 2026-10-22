@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Reactor.Utilities;
-using Reactor.Utilities.Attributes;
-using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -14,7 +11,6 @@ namespace HostUtility.Components;
 /// Utility component for handling player icons in a centered layout, similar to <see cref="GridArrange"/>.
 /// </summary>
 /// <param name="iPtr">The <see cref="IntPtr"/> for the component.</param>
-[RegisterInIl2Cpp]
 public class PlayerIconsBehaviour(IntPtr iPtr) : MonoBehaviour(iPtr)
 {
     /// <summary>
@@ -49,14 +45,16 @@ public class PlayerIconsBehaviour(IntPtr iPtr) : MonoBehaviour(iPtr)
     public GameObject IdIcon;
     public GameObject HostIcon;
     public GameObject PlatformIcon;
+    private PlayerControl owner;
     public void Initialize(PlayerControl owner)
     {
+        this.owner = owner;
         LevelIcon = Object.Instantiate(HudManager.Instance.MeetingPrefab.PlayerButtonPrefab.LevelNumberText.transform.parent, transform).gameObject;
         LevelIcon.transform.GetChild(1).GetComponent<TextMeshPro>().text = owner.Data.PlayerLevel.ToString();
         IdIcon = Object.Instantiate(HudManager.Instance.MeetingPrefab.PlayerButtonPrefab.LevelNumberText.transform.parent, transform).gameObject;
         IdIcon.transform.GetChild(1).GetComponent<TextMeshPro>().text = owner.Data.PlayerId.ToString();
         var headerText = IdIcon.transform.GetChild(0);
-        headerText.GetComponent<TextTranslatorTMP>().Destroy();
+        Destroy(headerText.GetComponent<TextTranslatorTMP>());
         headerText.GetComponent<TextMeshPro>().text = "ID";
         IdIcon.GetComponent<SpriteRenderer>().color = Color.magenta;
         HostIcon = Object.Instantiate(HudManager.Instance.MeetingPrefab.PlayerButtonPrefab.LevelNumberText.transform.parent, transform).gameObject;
@@ -64,7 +62,7 @@ public class PlayerIconsBehaviour(IntPtr iPtr) : MonoBehaviour(iPtr)
         text.GetComponent<TextMeshPro>().text = "★";
         text.transform.localPosition = Vector3.zero;
         var headerText2 = HostIcon.transform.GetChild(0);
-        headerText2.GetComponent<TextTranslatorTMP>().Destroy();
+        Destroy(headerText2.GetComponent<TextTranslatorTMP>());
         headerText2.GetComponent<TextMeshPro>().text = "";
         HostIcon.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0, 1, 1);
         PlatformIcon = Object.Instantiate(HudManager.Instance.MeetingPrefab.PlayerButtonPrefab.LevelNumberText.transform.parent, transform).gameObject;
@@ -90,12 +88,22 @@ public class PlayerIconsBehaviour(IntPtr iPtr) : MonoBehaviour(iPtr)
             go.gameObject.layer = 0;
         }
         
-        IdIcon.SetActive(PluginSingleton<HostUtilityPlugin>.Instance.ShowPlayerIDs.Value);
-        PlatformIcon.SetActive(PluginSingleton<HostUtilityPlugin>.Instance.ShowPlayerPlatforms.Value); 
+        IdIcon.SetActive(HostUtilityPlugin.Instance.ShowPlayerIDs.Value);
+        PlatformIcon.SetActive(HostUtilityPlugin.Instance.ShowPlayerPlatforms.Value); 
         HostIcon.SetActive(AmongUsClient.Instance.GetHost().Character == owner);
+        
+        LevelIcon.transform.localScale = HostIcon.transform.localScale = IdIcon.transform.localScale = PlatformIcon.transform.localScale = Vector3.zero;
+        owner.StartCoroutine(Effects.Bloop(0, LevelIcon.transform, 0.3f, 0.3f));
+        owner.StartCoroutine(Effects.Bloop(0.2f, IdIcon.transform, 0.3f, 0.3f));
+        owner.StartCoroutine(Effects.Bloop(0.4f, HostIcon.transform, 0.3f, 0.3f));
+        owner.StartCoroutine(Effects.Bloop(0.6f, PlatformIcon.transform, 0.3f, 0.3f));
     }
 
-    private void FixedUpdate() => CheckCurrentChildren();
+    private void FixedUpdate()
+    {
+        if (owner && owner.Data.IsDead) gameObject.SetActive(false);
+        CheckCurrentChildren();
+    }
 
     private void CheckCurrentChildren()
     {

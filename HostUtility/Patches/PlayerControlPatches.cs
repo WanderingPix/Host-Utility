@@ -1,14 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
-using AmongUs.InnerNet.GameDataMessages;
 using HarmonyLib;
-using Hazel;
-using HostUtility.AUFiles;
 using HostUtility.BanListAPI;
-using HostUtility.BanListAPI.Providers.AUFiles;
 using HostUtility.Components;
-using Il2CppSystem;
-using Reactor.Utilities;
 using UnityEngine;
 
 namespace HostUtility.Patches;
@@ -23,12 +16,12 @@ public class PlayerControlPatches
         var iconContainer = new GameObject("IconContainer");
         iconContainer.transform.SetParent(__instance.cosmetics.nameTextContainer.transform);
         iconContainer.transform.localPosition = __instance.cosmetics.nameText.transform.localPosition + new Vector3(0, 0.35f, 0);
-        __instance.StartCoroutine(Effects.ActionAfterDelay(0.25f,
+        __instance.StartCoroutine(Effects.ActionAfterDelay(1f,
             new System.Action(() => iconContainer.AddComponent<PlayerIconsBehaviour>().Initialize(__instance))));
         
         __instance.gameObject.AddComponent<TrackingDataBehaviour>().myPlayer = __instance;
         if (!AmongUsClient.Instance.AmHost) return;
-        var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
+        var plugin = HostUtilityPlugin.Instance;
         if (__instance == PlayerControl.LocalPlayer) return;
         __instance.StartCoroutine(Effects.ActionAfterDelay(1f, new System.Action(() =>
         {

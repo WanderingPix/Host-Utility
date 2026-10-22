@@ -8,7 +8,7 @@ using HarmonyLib;
 using HostUtility.BanListAPI.Providers.AUFiles.API;
 using HostUtility.BanListAPI.Providers.MAUL.API;
 using InnerNet;
-using Reactor.Utilities;
+
 using UnityEngine.Networking;
 
 namespace HostUtility.BanListAPI.Providers.MAUL;
@@ -28,7 +28,7 @@ public class MAULBanListProvider : BanListProvider
 
     public override IEnumerator CoLoadFromCloud()
     {
-        var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
+        var plugin = HostUtilityPlugin.Instance;
         plugin.Log.LogInfo("Began request to github for MAUL player banlist.");
 
         var request = UnityWebRequest.Get(
