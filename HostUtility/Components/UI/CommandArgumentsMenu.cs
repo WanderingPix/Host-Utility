@@ -108,10 +108,11 @@ public class CommandArgumentsMenu(IntPtr ptr) : MonoBehaviour(ptr)
                     rend.sprite = playerCharacterSprite.Value;
                     rend.material = new Material(HatManager.Instance.PlayerMaterial);
                     PlayerMaterial.SetColors(colorIndex, rend.material);
+                    var index = colorIndex;
                     btn.m_OnClick.AddListener(new Action(() =>
                     {
                         var field = HudManager.Instance.Chat.freeChatField;
-                        field.textArea.SetText(field.textArea.text.Replace(arg.Name, colorIndex.ToString()));
+                        field.textArea.SetText(field.textArea.text.Replace(arg.Name, index.ToString()));
                         GoToNextArgument();
                     }));
                     colorIndex++;
