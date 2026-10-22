@@ -12,7 +12,7 @@ public class ColorCommand : ChatCommand
     public override List<CommandArgument> Arguments => new(new []
     {
         new CommandArgument(CommandArgument.ArgumentType.Player, "PlayerName"),
-        new CommandArgument(CommandArgument.ArgumentType.Color, "Color")
+        new CommandArgument(CommandArgument.ArgumentType.Color, "ColId")
     });
 
     public override void Execute(string[] args)
@@ -20,10 +20,9 @@ public class ColorCommand : ChatCommand
         string playerName = args[0];
         var target = PlayerControl.AllPlayerControls.ToArray().First(x => x.Data.PlayerName == playerName);
         if (target == null) return;
-        string colorName = args[1];
-        var name = Palette.ColorNames.First(x => TranslationController.Instance.GetString(x).ToLower() == colorName.ToLower());
-        var index = Palette.ColorNames.IndexOf(name);
+        int colorId = int.Parse(args[1]);
+        var name = Palette.ColorNames[colorId];
         
-        target.RpcSetColor((byte)index);
+        target.RpcSetColor((byte)colorId);
     }
 }

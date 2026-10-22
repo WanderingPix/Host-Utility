@@ -1,6 +1,6 @@
 using System;
 
-namespace HostUtility.AUFiles.API;
+namespace HostUtility.BanListAPI.Providers.AUFiles.API;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming

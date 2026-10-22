@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
 using AmongUs.GameOptions;
+using BepInEx.Configuration;
 using HarmonyLib;
-using MonoMod.Utils;
-using Reactor.Utilities;
-using TMPro;
+using HostUtility.BanListAPI;
+using HostUtility.Components;
 using UnityEngine;
 
 namespace HostUtility.Patches;
@@ -16,7 +16,7 @@ public class GameSettingsMenuPatch
     [HarmonyPostfix]
     public static void GameSettingMenu_Start_Postfix(GameOptionsMenu __instance)
     {
-        var plugin = PluginSingleton<HostUtilityPlugin>.Instance;
+        var plugin = HostUtilityPlugin.Instance;
         float y = GetLowestActiveY(__instance);
         
         CreateHeader(__instance, "Anti Cheat", ref y);
@@ -24,12 +24,31 @@ public class GameSettingsMenuPatch
         
         CreateHeader(__instance, "Moderation", ref y);
         CreateToggle(__instance, "Ban Inappropriate Names", plugin.BanInappropriateNames.Value, b => plugin.BanInappropriateNames.Value = b, ref y);
-        CreateToggle(__instance, "Ban Inappropriate Messages", plugin.BanInappropriateMessages.Value, b => plugin.BanInappropriateMessages.Value = b, ref y);
-        CreateToggle(__instance, "Kick Suspected E-Daters and PDFs", plugin.KickSuspectedPlayers.Value, b => plugin.KickSuspectedPlayers.Value = b, ref y);
+        CreateToggle(__instance, "Ban Inappropriate Messages", plugin.BanInappropriateMessages.Value,
+            b => plugin.BanInappropriateMessages.Value = b, ref y);
         CreateToggle(__instance, "Kick Suspected Bots", plugin.KickSuspectedBots.Value, b => plugin.KickSuspectedBots.Value = b, ref y);
 
         CreateHeader(__instance, "Join Conditions", ref y);
         CreateInt(__instance, "Minimum Level", plugin.MinLevel.Value, 5, new FloatRange(0, 100), i => plugin.MinLevel.Value = (int)i, ref y);
+        
+        CreateHeader(__instance, "Ban Lists", ref y);
+        foreach (var banList in BanListManager.Providers)
+        {
+            CreateHeader(__instance, $"{banList.Name}\n<size=75%>({banList.Owner})</size>", ref y, true);
+            CreateToggle(__instance, "Active", banList.IsEnabled.Value,  b => banList.IsEnabled.Value = b, ref y,true);
+            foreach (var configEntryBase in banList.Settings)
+            {
+                if (configEntryBase is ConfigEntry<bool> boolEntry)
+                {
+                    CreateToggle(__instance, boolEntry.Definition.Key, boolEntry.Value, b => boolEntry.Value = b, ref y, true);
+                }
+                
+                else if (configEntryBase is ConfigEntry<float> floatEntry)
+                {
+                    CreateInt(__instance, floatEntry.Definition.Key, (int)floatEntry.Value, 5, new FloatRange(0, 100), v => floatEntry.Value = v, ref y, true);
+                }
+            }
+        }
 
         CreateHeader(__instance, "Miscellaneous", ref y);
         CreateInt(__instance, "Game Start Countdown", plugin.GameStartCountdownTime.Value, 1, new FloatRange(0, 10), i => plugin.GameStartCountdownTime.Value = (int)i, ref y);
@@ -38,22 +57,34 @@ public class GameSettingsMenuPatch
         CreateToggle(__instance, "Show Player Platforms", plugin.ShowPlayerPlatforms.Value, b =>
         {
             plugin.ShowPlayerPlatforms.Value = b;
-            foreach (var p in PlayerControl.AllPlayerControls)
+            foreach (var icon in PlayerIconsBehaviour.AllIcons)
             {
-                p.cosmetics.nameText.text = p.Data.PlayerName;
-                if (plugin.ShowPlayerPlatforms.Value) p.cosmetics.nameText.text += $" ({AmongUsClient.Instance.GetClientFromCharacter(p).PlatformData.Platform.ToString().SpacedPascalCase()})";
-                if (plugin.ShowPlayerIDs.Value) p.cosmetics.nameText.text += $" (ID: {p.PlayerId})";
+                icon.PlatformIcon.SetActive(b);
             }
         }, ref y);
         CreateToggle(__instance, "Show Player IDs", plugin.ShowPlayerIDs.Value, b =>
         {
             plugin.ShowPlayerIDs.Value = b;
-            foreach (var p in PlayerControl.AllPlayerControls)
+            foreach (var icon in PlayerIconsBehaviour.AllIcons)
             {
-                p.cosmetics.nameText.text = p.Data.PlayerName;
-                if (plugin.ShowPlayerPlatforms.Value) p.cosmetics.nameText.text += $" ({AmongUsClient.Instance.GetClientFromCharacter(p).PlatformData.PlatformName})";
-                if (plugin.ShowPlayerIDs.Value) p.cosmetics.nameText.text += $" (ID: {p.PlayerId})";
+                icon.IdIcon.SetActive(b);
             }
+        }, ref y);
+        
+        CreateToggle(__instance, "Show Player Levels", plugin.ShowPlayerLevels.Value, b =>
+        {
+            plugin.ShowPlayerLevels.Value = b;
+            foreach (var icon in PlayerIconsBehaviour.AllIcons)
+            {
+                icon.LevelIcon.SetActive(b);
+            }
+        }, ref y);
+
+        CreateToggle(__instance, "<color=red>Game End Behaviour</color>", plugin.GameEndEnabled.Value, b =>
+        {
+            plugin.GameEndEnabled.Value = b;
+            GameManager.Instance.gameObject.SetActive(b);
+            if (!b) HudManager.Instance.Notifier.AddDisconnectMessage("<b>Game End has been DISABLED</b>, the game will not end normally.");
         }, ref y);
 
         FixScroller(__instance, y);
@@ -74,11 +105,11 @@ public class GameSettingsMenuPatch
         return active.Min(c => c.transform.localPosition.y);
     }
 
-    private static void CreateToggle(GameOptionsMenu __instance, string title, bool defaultValue, Action<bool> callback, ref float y)
+    private static void CreateToggle(GameOptionsMenu __instance, string title, bool defaultValue, Action<bool> callback, ref float y, bool isSubcategory = false)
     {
         y -= 0.45f;
         var optionBehaviour1 = UnityEngine.Object.Instantiate<ToggleOption>(__instance.checkboxOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
-        optionBehaviour1.transform.localPosition = new Vector3(0.952f, y, -2f);
+        optionBehaviour1.transform.localPosition = new Vector3(!isSubcategory ? 0.952f : 1.2f, y, -2f);
         optionBehaviour1.SetClickMask(__instance.ButtonClickMask);
         foreach (var rend in optionBehaviour1.GetComponentsInChildren<SpriteRenderer>(true))
         {
@@ -101,11 +132,11 @@ public class GameSettingsMenuPatch
 
     private static readonly Color ThemeColor = Color.Lerp(Color.white, new Color(0.1f, 0.1f, 0.5f), 0.4f);
     private static void CreateInt(GameOptionsMenu __instance, string title, int defaultValue, float increment, FloatRange range,
-        Action<float> callback, ref float y)
+        Action<float> callback, ref float y, bool isSubcategory = false)
     {
         y -= 0.45f;
         var optionBehaviour1 = UnityEngine.Object.Instantiate(__instance.numberOptionOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
-        optionBehaviour1.transform.localPosition = new Vector3(0.952f, y, -2f);
+        optionBehaviour1.transform.localPosition = new Vector3(!isSubcategory ? 0.952f : 1.2f, y, -2f);
         optionBehaviour1.SetClickMask(__instance.ButtonClickMask);
         foreach (var rend in optionBehaviour1.GetComponentsInChildren<SpriteRenderer>(true))
         {
@@ -148,13 +179,13 @@ public class GameSettingsMenuPatch
         __instance.Children.Add(optionBehaviour1);
     }
 
-    private static void CreateHeader(GameOptionsMenu __instance, string title, ref float y)
+    private static void CreateHeader(GameOptionsMenu __instance, string title, ref float y, bool isSubcategory = false)
     {
         y -= 0.63f;
         CategoryHeaderMasked categoryHeaderMasked = UnityEngine.Object.Instantiate<CategoryHeaderMasked>(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
         categoryHeaderMasked.Title.text = title;
         categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
-        categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, y, -2f);
+        categoryHeaderMasked.transform.localPosition = new Vector3(!isSubcategory ? -0.903f : -0.6f, y, -2f);
         int maskLayer = 20;
         categoryHeaderMasked.Background.color = Color.Lerp(categoryHeaderMasked.Background.color, new Color(0.1f, 0.1f, 0.5f), 0.4f);
         categoryHeaderMasked.Background.material.SetInt(PlayerMaterial.MaskLayer, maskLayer);
