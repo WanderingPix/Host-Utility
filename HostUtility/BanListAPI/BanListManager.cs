@@ -15,8 +15,15 @@ public static class BanListManager
         foreach (var type in Assembly.GetAssembly(typeof(BanListManager))?.GetTypes().Where(x => x.IsAssignableTo(typeof(BanListProvider)) && !x.IsAbstract)!)
         {
             var instance = Activator.CreateInstance(type) as BanListProvider;
+            try 
+            {
+                instance?.Initialize();
+            }
+            catch (Exception e)
+            {
+                continue;
+            }
             Providers.Add(instance);
-            instance?.Initialize();
         }
     }
 

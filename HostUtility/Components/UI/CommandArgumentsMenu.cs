@@ -130,6 +130,13 @@ public class CommandArgumentsMenu(IntPtr ptr) : MonoBehaviour(ptr)
     private void Start()
     {
         Instance = this;
+        var sourceText = HudManager.Instance.TaskPanel.TaskText;
+        foreach (var tmp in buttonPrefab.Value.gameObject.GetComponentsInChildren<TextMeshProUGUI>())
+        {
+            tmp.fontMaterial = new(sourceText.fontMaterial);
+            tmp.font = sourceText.font;
+            tmp.mat
+        }
         HudManager.Instance.Chat.freeChatField.OnChangedEvent += new Action(() =>
         {
             var chatText = HudManager.Instance.Chat.freeChatField.textArea.text;
