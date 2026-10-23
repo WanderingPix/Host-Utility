@@ -56,6 +56,12 @@ public class CommandSuggestionMenu(IntPtr ptr) : MonoBehaviour(ptr)
         _rectTransform = GetComponent<RectTransform>();
         _canvas = GetComponentInParent<Canvas>();
         HudManager.Instance.Chat.freeChatField.OnChangedEvent += new Action(Refresh);
+        var sourceText = HudManager.Instance.TaskPanel.taskText;
+        foreach (var tmp in buttonPrefab.Value.gameObject.GetComponentsInChildren<TextMeshProUGUI>())
+        {
+            tmp.fontMaterial = new(sourceText.fontMaterial);
+            tmp.font = sourceText.font;
+        }
         gameObject.SetActive(false);
     }
 

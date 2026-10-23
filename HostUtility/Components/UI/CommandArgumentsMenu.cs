@@ -130,7 +130,7 @@ public class CommandArgumentsMenu(IntPtr ptr) : MonoBehaviour(ptr)
     private void Start()
     {
         Instance = this;
-        var sourceText = HudManager.Instance.TaskPanel.TaskText;
+        var sourceText = HudManager.Instance.TaskPanel.taskText;
         foreach (var tmp in buttonPrefab.Value.gameObject.GetComponentsInChildren<TextMeshProUGUI>())
         {
             tmp.fontMaterial = new(sourceText.fontMaterial);
