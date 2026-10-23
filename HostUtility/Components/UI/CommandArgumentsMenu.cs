@@ -135,7 +135,6 @@ public class CommandArgumentsMenu(IntPtr ptr) : MonoBehaviour(ptr)
         {
             tmp.fontMaterial = new(sourceText.fontMaterial);
             tmp.font = sourceText.font;
-            tmp.mat
         }
         HudManager.Instance.Chat.freeChatField.OnChangedEvent += new Action(() =>
         {
