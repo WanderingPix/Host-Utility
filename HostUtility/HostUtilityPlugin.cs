@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace HostUtility;
 
-[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "2.0.0")]
+[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "2.0.1")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency("000.nebula.compat", BepInDependency.DependencyFlags.SoftDependency)]
 public partial class HostUtilityPlugin : BasePlugin
