@@ -18,7 +18,7 @@ public class ChatControllerPatches
         {
             if (chatText.StartsWith("/cmd"))
             {
-                var cmd = ChatCommandsManager.Commands.Find(x => chatText.StartsWith($"/cmd {x.Command.ToLower()} "));
+                var cmd = ChatCommandsManager.Commands.Find(x => chatText.StartsWith($"/cmd {x.Command.ToLower()}"));
                 cmd?.Execute(chatText.Replace("/cmd " + cmd.Command.ToLower() + " ", "").Split(","));
             }
         }

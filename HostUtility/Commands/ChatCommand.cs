@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using HostUtility.Commands.Arguments;
 
 namespace HostUtility.Commands;
 
@@ -35,18 +36,5 @@ public abstract class ChatCommand
     public virtual string GetInfoText()
     {
         return "Something went wrong, make sure you're using proper syntax for this command!";
-    }
-}
-public class CommandArgument(CommandArgument.ArgumentType type, string name)
-{
-    public ArgumentType Type = type;
-    public string Name = name.ToLower();
-    public enum ArgumentType
-    {
-        String,
-        Int,
-        Bool,
-        Player,
-        Color
     }
 }
