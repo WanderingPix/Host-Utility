@@ -16,6 +16,8 @@ public class MainMenuPatch
     [HarmonyPostfix]
     public static void StartPostfix(MainMenuManager __instance)
     {
+        BanListManager.Initialize();
+        
         var original = Object.FindObjectOfType<VersionShower>();
         if (!original)
             return;

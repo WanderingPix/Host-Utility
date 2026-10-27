@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using HostUtility.Commands.Arguments;
 
 namespace HostUtility.Commands;
 
@@ -11,13 +12,12 @@ public class BanCommand : ChatCommand
 
     public override List<CommandArgument> Arguments => new(new []
     {
-        new CommandArgument(CommandArgument.ArgumentType.Player, "Player Name")
+        new PlayerArgument("TargetPlayer",player => !player.AmOwner)
     });
 
     public override void Execute(string[] args)
     {
-        string playerName = args[0];
-        var target = PlayerControl.AllPlayerControls.ToArray().First(x => x.Data.PlayerName == playerName);
+        var target = (Arguments[0] as PlayerArgument)?.Deserialize(args[0]);
         if (target == null) return;
         AmongUsClient.Instance.KickPlayer(AmongUsClient.Instance.GetClientFromCharacter(target).Id, true);
     }

@@ -9,22 +9,26 @@ namespace HostUtility.BanListAPI;
 public static class BanListManager
 {
     public static List<BanListProvider> Providers;
+    public static bool Initialized = false;
     public static void Initialize()
     {
+        if (Initialized) return;
         Providers = new();
         foreach (var type in Assembly.GetAssembly(typeof(BanListManager))?.GetTypes().Where(x => x.IsAssignableTo(typeof(BanListProvider)) && !x.IsAbstract)!)
         {
-            var instance = Activator.CreateInstance(type) as BanListProvider;
             try 
             {
+                var instance = Activator.CreateInstance(type) as BanListProvider;
                 instance?.Initialize();
+                Providers.Add(instance);
             }
             catch (Exception e)
             {
+                Logger.GlobalInstance.Error("Ban List " + type.Name + " failed to initialize." + e);
                 continue;
             }
-            Providers.Add(instance);
         }
+        Initialized = true;
     }
 
     public static string GetMainMenuInfoText()

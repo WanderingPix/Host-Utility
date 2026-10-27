@@ -46,6 +46,13 @@ public class CommandSuggestionMenu(IntPtr ptr) : MonoBehaviour(ptr)
                 CommandArgumentsMenu.Instance.Begin(cmd);
                 gameObject.SetActive(false);
             }));
+            var sourceText = HudManager.Instance.TaskPanel.taskText;
+            foreach (var tmp in btn.gameObject.GetComponentsInChildren<TextMeshProUGUI>())
+            {
+                tmp.fontMaterial = new(sourceText.fontMaterial);
+                tmp.font = sourceText.font;
+                tmp.color = Color.white;
+            }
         }
         if (Buttons.Count == 0) gameObject.SetActive(false);
         else gameObject.SetActive(true);
@@ -56,12 +63,6 @@ public class CommandSuggestionMenu(IntPtr ptr) : MonoBehaviour(ptr)
         _rectTransform = GetComponent<RectTransform>();
         _canvas = GetComponentInParent<Canvas>();
         HudManager.Instance.Chat.freeChatField.OnChangedEvent += new Action(Refresh);
-        var sourceText = HudManager.Instance.TaskPanel.taskText;
-        foreach (var tmp in SuggestionPrefab.Value.gameObject.GetComponentsInChildren<TextMeshProUGUI>())
-        {
-            tmp.fontMaterial = new(sourceText.fontMaterial);
-            tmp.font = sourceText.font;
-        }
         gameObject.SetActive(false);
     }
 

@@ -52,6 +52,7 @@ public class GameSettingsMenuPatch
 
         CreateHeader(__instance, "Miscellaneous", ref y);
         CreateInt(__instance, "Game Start Countdown", plugin.GameStartCountdownTime.Value, 1, new FloatRange(0, 10), i => plugin.GameStartCountdownTime.Value = (int)i, ref y);
+        CreateToggle(__instance, "Disable R1 Button presses", plugin.DisableR1Meetings.Value, b => plugin.DisableR1Meetings.Value = b, ref y);
         
         CreateHeader(__instance, "Advanced", ref y);
         CreateToggle(__instance, "Show Player Platforms", plugin.ShowPlayerPlatforms.Value, b =>
@@ -80,12 +81,16 @@ public class GameSettingsMenuPatch
             }
         }, ref y);
 
-        CreateToggle(__instance, "<color=red>Game End Behaviour</color>", plugin.GameEndEnabled.Value, b =>
+        var action = new Action<bool>(b =>
         {
             plugin.GameEndEnabled.Value = b;
             GameManager.Instance.gameObject.SetActive(b);
-            if (!b) HudManager.Instance.Notifier.AddDisconnectMessage("<b>Game End has been DISABLED</b>, the game will not end normally.");
-        }, ref y);
+            if (!b)
+                HudManager.Instance.Notifier.AddDisconnectMessage(
+                    "<b>Game End has been DISABLED</b>, the game will not end normally.");
+        });
+        action.Invoke(plugin.GameEndEnabled.Value);
+        CreateToggle(__instance, "<color=red>Game End Behaviour</color>", plugin.GameEndEnabled.Value, action, ref y);
 
         FixScroller(__instance, y);
     }
@@ -98,7 +103,6 @@ public class GameSettingsMenuPatch
 
         if (active.Length == 0)
         {
-            // Fallback: nothing active, don't crash — use whatever is last.
             return __instance.Children.ToArray().Last().transform.localPosition.y;
         }
 
