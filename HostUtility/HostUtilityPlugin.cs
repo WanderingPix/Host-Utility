@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace HostUtility;
 
-[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "2.0.1")]
+[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "2.1.0")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency("000.nebula.compat", BepInDependency.DependencyFlags.SoftDependency)]
 public partial class HostUtilityPlugin : BasePlugin
@@ -26,10 +26,12 @@ public partial class HostUtilityPlugin : BasePlugin
     public ConfigEntry<bool> ShowPlayerIDs;
     public ConfigEntry<bool> ShowPlayerPlatforms;
     public ConfigEntry<bool> ShowPlayerLevels;
+    public ConfigEntry<bool> DisableR1Meetings;
     public ConfigEntry<bool> GameEndEnabled;
-    
+    public ConfigEntry<bool> UseHostAuthority;
     public static AssetBundle Bundle;
     public Harmony Harmony { get; } = new(Id);
+
     public override void Load()
     {
         Instance = this;
@@ -60,14 +62,15 @@ public partial class HostUtilityPlugin : BasePlugin
         CheckMessageCooldowns = Config.Bind<bool>("Anticheat", "Force message cooldowns", true);
         
         GameStartCountdownTime = Config.Bind("Game", "Game Start Countdown Time", 5);
+        DisableR1Meetings = Config.Bind("Game", "Disable Round 1 Meetings", true);
         
         ShowPlayerIDs = Config.Bind<bool>("Advanced", "Show Player IDs", false);
         ShowPlayerPlatforms = Config.Bind<bool>("Advanced", "Show Player Platforms", true);
         ShowPlayerPlatforms = Config.Bind<bool>("Advanced", "Show Player Platforms", true);
         ShowPlayerLevels = Config.Bind<bool>("Advanced", "Show Player Levels", true);
         GameEndEnabled = Config.Bind<bool>("Advanced", "Game End", true);
+        UseHostAuthority = Config.Bind<bool>("Advanced", "Use Host Authority", true);
         
-        BanListManager.Initialize();
         Log.LogInfo("Host Utility loaded successfully! :D");
     }
 
