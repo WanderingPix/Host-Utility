@@ -1,6 +1,7 @@
 using System.Linq;
 using HarmonyLib;
 using HostUtility.Components;
+using HostUtility.Components.UI;
 using UnityEngine;
 
 namespace HostUtility.Patches;
@@ -29,11 +30,33 @@ public class ChatControllerPatches
             AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Inappropriate Message", "",true);
         }
     }
+
+    public static ChatInputFieldButton cancelButton;
     [HarmonyPatch(nameof(ChatController.Awake))]
     [HarmonyPostfix]
     public static void ChatController_Awake_Postfix(ChatController __instance)
     {
         Object.Instantiate(HostUtilityAssets.SuggestionsMenuPrefab, __instance.chatScreen.transform);
         Object.Instantiate(HostUtilityAssets.ArgumentsMenuPrefab, __instance.chatScreen.transform);
+        cancelButton = Object.Instantiate(__instance.freeChatField.submitButton, __instance.freeChatField.submitButton.transform.parent, true);
+        cancelButton.text.text = "Cancel";
+        cancelButton.text.color = new Color(1, 0.7f, 0.7f);
+        foreach (var rend in cancelButton.backgroundSprites)
+        {
+            rend.color = new Color(1, 0.3f, 0.3f);
+        }
+        foreach (var icon in cancelButton.iconSprites)
+        {
+            icon.color = cancelButton.text.color;
+            icon.flipX = !icon.flipX;
+        }
+
+        cancelButton.OnPressed = new System.Action(() =>
+        {
+            __instance.freeChatField.textArea.SetText(string.Empty);
+            CommandArgumentsMenu.Instance.ForceClose();
+        });
+        Object.Destroy(cancelButton.text.GetComponent<TextTranslatorTMP>());
+        cancelButton.gameObject.SetActive(false);
     }
 }

@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace HostUtility;
 
-[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "2.1.0")]
+[BepInAutoPlugin("com.missingpixel.hostutility", "Host Utility", "2.2.0")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency("000.nebula.compat", BepInDependency.DependencyFlags.SoftDependency)]
 public partial class HostUtilityPlugin : BasePlugin
@@ -29,6 +29,7 @@ public partial class HostUtilityPlugin : BasePlugin
     public ConfigEntry<bool> DisableR1Meetings;
     public ConfigEntry<bool> GameEndEnabled;
     public ConfigEntry<bool> UseHostAuthority;
+    public ConfigEntry<uint> ChatTheme;
     public static AssetBundle Bundle;
     public Harmony Harmony { get; } = new(Id);
 

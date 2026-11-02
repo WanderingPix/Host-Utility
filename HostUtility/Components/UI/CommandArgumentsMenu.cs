@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using HostUtility.Commands;
 using HostUtility.Commands.Arguments;
+using HostUtility.Patches;
+using Il2CppInterop.Runtime.Attributes;
 using Il2CppInterop.Runtime.InteropTypes.Fields;
 using TMPro;
 using UnityEngine;
@@ -28,6 +30,7 @@ public class CommandArgumentsMenu(IntPtr ptr) : MonoBehaviour(ptr)
     public void Begin(ChatCommand command)
     {
         gameObject.SetActive(true);
+        ChatControllerPatches.cancelButton.gameObject.SetActive(true);
         var field = HudManager.Instance.Chat.freeChatField;
         field.submitButton.gameObject.SetActive(false);
         string text = "/cmd " + command.Command.ToLower();
@@ -48,9 +51,6 @@ public class CommandArgumentsMenu(IntPtr ptr) : MonoBehaviour(ptr)
         if (ArgumentsLeft.Count == 0)
         {
             gameObject.SetActive(false);
-            var field = HudManager.Instance.Chat.freeChatField;
-            field.submitButton.gameObject.SetActive(true);
-            field.textArea.enabled = true;
             return;
         }
         var arg = ArgumentsLeft.Dequeue();
@@ -109,6 +109,14 @@ public class CommandArgumentsMenu(IntPtr ptr) : MonoBehaviour(ptr)
         Buttons.Add(btn);
     }
 
+    private void OnDisable()
+    {
+        ChatControllerPatches.cancelButton.gameObject.SetActive(false);
+        var field = HudManager.Instance.Chat.freeChatField;
+        field.submitButton.gameObject.SetActive(true);
+        field.textArea.enabled = true;
+    }
+
     private void Start()
     {
         Instance = this;
@@ -159,6 +167,13 @@ public class CommandArgumentsMenu(IntPtr ptr) : MonoBehaviour(ptr)
             min.x + fieldW * (1f - widthFraction) * 0.5f,
             max.y + fieldH * gapFraction,
             0f);
+    }
+
+    public void ForceClose()
+    {
+        ArgumentsLeft.Clear();
+        CurrentArgument = null!;
+        gameObject.SetActive(false);
     }
 
     public enum ArgumentSpriteTypes
