@@ -6,6 +6,7 @@ using HarmonyLib;
 using HostUtility.BanListAPI;
 using HostUtility.Components;
 using HostUtility.Components.UI;
+using HostUtility.GameSettings;
 using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Runtime.InteropServices;
 using UnityEngine;
@@ -52,6 +53,7 @@ public partial class HostUtilityPlugin : BasePlugin
         ClassInjector.RegisterTypeInIl2Cpp<TrackingDataBehaviour>();
         ClassInjector.RegisterTypeInIl2Cpp<CommandArgumentsMenu>();
         ClassInjector.RegisterTypeInIl2Cpp<CommandSuggestionMenu>();
+        ClassInjector.RegisterTypeInIl2Cpp<PaginationBehaviour>();
         ChatCommandsManager.Initialize();
         HostUtilityAssets.Initialize();
         
@@ -72,6 +74,7 @@ public partial class HostUtilityPlugin : BasePlugin
         GameEndEnabled = Config.Bind<bool>("Advanced", "Game End", true);
         UseHostAuthority = Config.Bind<bool>("Advanced", "Use Host Authority", true);
         
+        GameSettingsManager.Initialize();
         Log.LogInfo("Host Utility loaded successfully! :D");
     }
 
