@@ -29,21 +29,21 @@ public class ModdedNumberOption : ModdedOption<int>
     {
         y -= 0.45f;
         var optionBehaviour1 = UnityEngine.Object.Instantiate(__instance.numberOptionOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
-        optionBehaviour1.transform.localPosition = new Vector3(0.952f, y, -2f);
+        optionBehaviour1.transform.localPosition = new Vector3(1f, y, -2f);
         Object.Destroy(optionBehaviour1.TitleText.GetComponent<TextTranslatorTMP>());
         optionBehaviour1.SetClickMask(__instance.ButtonClickMask);
         foreach (var rend in optionBehaviour1.GetComponentsInChildren<SpriteRenderer>(true))
         {
             rend.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         }
-        optionBehaviour1.StartCoroutine(Effects.ActionAfterDelay(0.05f, new System.Action(() => optionBehaviour1.TitleText.text = Name)));
+
+        optionBehaviour1.TitleText.text = Name;
         optionBehaviour1.ValidRange = new FloatRange(MinimumValue, MaximumValue);
-        optionBehaviour1.Value = DefaultValue;
-        optionBehaviour1.ValueText.text = optionBehaviour1.Value.ToString();
+        optionBehaviour1.Value = Value;
+        optionBehaviour1.ValueText.text = Value + Suffix;
         optionBehaviour1.Increment = Increment;
         optionBehaviour1.intOptionName = Int32OptionNames.Invalid;
         optionBehaviour1.floatOptionName = FloatOptionNames.Invalid;
-        optionBehaviour1.TitleText.text = Name;
         
         optionBehaviour1.StartCoroutine(Effects.ActionAfterDelay(0.05f, new System.Action(() =>
         {
@@ -70,6 +70,7 @@ public class ModdedNumberOption : ModdedOption<int>
             ConfigEntry.Value = (int)optionBehaviour1.Value;
         }));
         __instance.Children.Add(optionBehaviour1);
+        optionBehaviour1.enabled = false;
         
         return optionBehaviour1.gameObject;
     }

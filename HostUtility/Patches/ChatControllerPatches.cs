@@ -2,6 +2,7 @@ using System.Linq;
 using HarmonyLib;
 using HostUtility.Components;
 using HostUtility.Components.UI;
+using HostUtility.GameSettings;
 using UnityEngine;
 
 namespace HostUtility.Patches;
@@ -25,7 +26,7 @@ public class ChatControllerPatches
         }
         if (!AmongUsClient.Instance.AmHost) return;
 
-        if (BanWords.ContainsSwear(chatText) && HostUtilityPlugin.Instance.BanInappropriateMessages.Value)
+        if (BanWords.ContainsSwear(chatText) && SettingTabSingleton<ModerationTab>.Instance.BanInappropriateMessages.Value)
         {
             AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Inappropriate Message", "",true);
         }

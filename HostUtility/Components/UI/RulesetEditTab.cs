@@ -4,6 +4,7 @@ using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace HostUtility.Components.UI;
 
@@ -14,14 +15,13 @@ public class RulesetEditTab(IntPtr ptr) : MonoBehaviour(ptr)
     public ChatBubble bubble;
     public TextBoxTMP bubbleTextBox;
     public PassiveButton bubbleButton;
-    public TextMeshPro headerText;
     public FreeChatInputField saveField;
 
     public void Initialize(GameSettingMenu menu, GameOptionsMenu menu2, ChatBubble myBubble)
     {
         gameSettingsMenu = menu;
         gameOptionsMenu = menu2;
-        bubble = myBubble;
+        bubble = Instantiate(myBubble, myBubble.transform.parent, true);
         bubbleTextBox = bubble.TextArea.gameObject.AddComponent<TextBoxTMP>();
         bubbleTextBox.outputText = bubble.TextArea;
         bubbleTextBox.OnChange = new Button.ButtonClickedEvent();
@@ -51,16 +51,35 @@ public class RulesetEditTab(IntPtr ptr) : MonoBehaviour(ptr)
         saveField.textArea.SetText(string.Empty);
         saveField.submitButton.button.buttonText.GetComponent<TextTranslatorTMP>().enabled = false; 
         saveField.submitButton.button.buttonText.text = "Save";
-        saveField.transform.localPosition = new Vector3(0.75f, -4.1f, -50);
+        saveField.submitButton.button.buttonText.transform.localPosition = new Vector3(-0.125f, 0, -10);
+        saveField.submitButton.transform.localPosition = new Vector3(1.75f, 0, -1f);
+        menu.StartCoroutine(Effects.ActionAfterDelay(0.01f, new Action(() => 
+            saveField.submitButton.transform.localPosition = new Vector3(1.75f, 0, -1f))));
+        saveField.submitButton.transform.localScale *= 1.2f;
+        foreach (var icon in saveField.submitButton.iconSprites)
+        {
+            icon.enabled = false;
+        }
+        saveField.transform.localPosition = new Vector3(-0.6f, -4.1f, -50);
         saveField.transform.localScale *= 0.8f;
+        saveField.background.size =
+            saveField.fieldButton.Colliders[0].TryCast<BoxCollider2D>()!.size = new Vector2(3, 0.6f);
+        saveField.charCountText.enabled = false;
+        saveField.OnChangedEvent += new Action(() =>
+        {
+            saveField.transform.localPosition = new Vector3(-0.6f, -4.1f, -50);
+        });
         BeginEditing();
     }
 
     public void Save()
     {
         File.WriteAllText(Path.Combine(HostUtilityDirectories.RulesetsPath, saveField.Text), bubbleTextBox.text);
+        foreach (var g in _toReactivate)
+        {
+            g.SetActive(true);
+        }
         Destroy(gameObject);
-        gameSettingsMenu.Close(); //TODO not close :)
     }
     
     public void BeginEditing()
@@ -92,7 +111,11 @@ public class RulesetEditTab(IntPtr ptr) : MonoBehaviour(ptr)
         var colorControls = CreateColorControls(null);
         colorControls.transform.SetParent(gameObject.transform, false);
         colorControls.transform.localPosition = new Vector3(-1.175f, -2.5f, -1);
+
+        _toReactivate = [parentTransform.transform.parent.gameObject, leftPanel, originalLabel.gameObject, tint, tip ];
     }
+
+    private List<GameObject> _toReactivate;
     
     //Size controls
     public List<PassiveButton> sizeButtons = [];
@@ -244,10 +267,10 @@ public class RulesetEditTab(IntPtr ptr) : MonoBehaviour(ptr)
         colorButtons = [];
 
         List<PassiveButton> buttons = [
-            CreateFormatButton("Bold", "<b>", "</b>"),
-            CreateFormatButton("Italic", "<i>", "</i>"),
-            CreateFormatButton("Strikethrough", "<s>", "</s>"),
-            CreateFormatButton("Underline", "<u>", "</u>"),
+            CreateFormatButton("Ab", "<b>", "</b>"),
+            CreateFormatButton("Ab", "<i>", "</i>"),
+            CreateFormatButton("Ab", "<s>", "</s>"),
+            CreateFormatButton("Ab", "<u>", "</u>"),
         ];
         
         foreach (var btn in buttons) btn.transform.SetParent(container.transform);

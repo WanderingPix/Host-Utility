@@ -50,5 +50,10 @@ public class PaginationBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
     private void Start()
     {
         UpdateText();
+        foreach (var page in pages)
+        {
+            page.SetActive(false);
+        }
+        pages[0].SetActive(true);
     }
 }

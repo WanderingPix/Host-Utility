@@ -1,6 +1,7 @@
 using AmongUs.Data;
 using HarmonyLib;
 using HostUtility.Components;
+using HostUtility.GameSettings;
 
 namespace HostUtility.Patches;
 
@@ -39,7 +40,7 @@ public static class GameStartManagerPatches
         DataManager.Player.Save();
         __instance.StartButtonClient.gameObject.SetActive(false);
         __instance.GameStartTextParent.SetActive(false);
-        __instance.countDownTimer = HostUtilityPlugin.Instance.GameStartCountdownTime.Value;
+        __instance.countDownTimer = SettingTabSingleton<AdvancedTab>.Instance.GameStartCountdown.Value;
         __instance.startState = GameStartManager.StartingStates.Countdown;
         AmongUsClient.Instance.KickNotJoinedPlayers();
         return false;

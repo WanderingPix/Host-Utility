@@ -25,7 +25,7 @@ public abstract class ChatCommand
         {
             Execute(args);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             success = false;
             return;

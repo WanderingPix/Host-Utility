@@ -18,19 +18,7 @@ namespace HostUtility;
 [BepInDependency("000.nebula.compat", BepInDependency.DependencyFlags.SoftDependency)]
 public partial class HostUtilityPlugin : BasePlugin
 {
-    public ConfigEntry<int> MinLevel;
-    public ConfigEntry<int> GameStartCountdownTime;
-    public ConfigEntry<bool> BanInappropriateNames;
-    public ConfigEntry<bool> BanInappropriateMessages;
-    public ConfigEntry<bool> CheckMessageCooldowns;
-    public ConfigEntry<bool> KickSuspectedBots;
-    public ConfigEntry<bool> ShowPlayerIDs;
-    public ConfigEntry<bool> ShowPlayerPlatforms;
-    public ConfigEntry<bool> ShowPlayerLevels;
-    public ConfigEntry<bool> DisableR1Meetings;
-    public ConfigEntry<bool> GameEndEnabled;
     public ConfigEntry<bool> UseHostAuthority;
-    public ConfigEntry<uint> ChatTheme;
     public static AssetBundle Bundle;
     public Harmony Harmony { get; } = new(Id);
     public override void Load()
@@ -57,20 +45,6 @@ public partial class HostUtilityPlugin : BasePlugin
         ChatCommandsManager.Initialize();
         HostUtilityAssets.Initialize();
         
-        MinLevel = Config.Bind<int>("Join Conditions", "Minimum Level", 0);
-        BanInappropriateNames = Config.Bind<bool>("Join Conditions", "Ban Inappropriate Names", true);
-        BanInappropriateMessages = Config.Bind<bool>("Join Conditions", "Ban Inappropriate Messages", true);
-        KickSuspectedBots = Config.Bind<bool>("Join Conditions", "Kick Suspected Bots", true);
-        
-        CheckMessageCooldowns = Config.Bind<bool>("Anticheat", "Force message cooldowns", true);
-        
-        GameStartCountdownTime = Config.Bind("Game", "Game Start Countdown Time", 5);
-        DisableR1Meetings = Config.Bind("Game", "Disable Round 1 Meetings", true);
-        
-        ShowPlayerIDs = Config.Bind<bool>("Advanced", "Show Player IDs", false);
-        ShowPlayerPlatforms = Config.Bind<bool>("Advanced", "Show Player Platforms", true);
-        ShowPlayerLevels = Config.Bind<bool>("Advanced", "Show Player Levels", true);
-        GameEndEnabled = Config.Bind<bool>("Advanced", "Game End", true);
         UseHostAuthority = Config.Bind<bool>("Advanced", "Use Host Authority", true);
         
         GameSettingsManager.Initialize();

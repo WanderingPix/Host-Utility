@@ -60,6 +60,8 @@ public class RulesetsTab : GameSettingsTab
             editUi.transform.localPosition = Vector3.zero;
             editUi.Initialize(gameSettingMenu, gameOptionsMenu, bubble);
         }, ref y);
+        gameOptionsMenu.transform.FindChild("UI_ScrollbarTrack").localPosition = new Vector3(4.225f, -1.6f, -55);
+        gameOptionsMenu.transform.FindChild("UI_Scrollbar").localPosition = new Vector3(4.225f, -1.6f, -55);
     }
 
     private PassiveButton CreateRulesetButton(GameOptionsMenu gameOptionsMenu, Transform parentTransform, string name, Action callback, ref float y)
@@ -77,8 +79,14 @@ public class RulesetsTab : GameSettingsTab
         button.OnClick.AddListener(callback);
         button.OnClick.AddListener(new Action(() => button.SelectButton(true)));
         buttons.Add(button);
-        button.transform.localPosition = new Vector3(-0f, y, -20f);
+        button.transform.localPosition = new Vector3(-0.25f, y, -20f);
         y -= 0.7f;
+        button.SetMaskLayer(20);
+        foreach (var componentsInChild in button.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            componentsInChild.material.SetFloat(PassiveButton.STENCIL_COMP, 3f);
+            componentsInChild.material.SetFloat(PassiveButton.STENCIL, 20);
+        }
         return button;
     }
 }

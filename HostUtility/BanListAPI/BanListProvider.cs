@@ -6,6 +6,7 @@ using System.IO;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HostUtility.AUOS.API;
+using HostUtility.GameSettings.OptionTypes;
 using InnerNet;
 
 using UnityEngine;
@@ -18,8 +19,8 @@ public abstract class BanListProvider
     public abstract string Owner { get; }
     public ProviderState State { get; set; } = ProviderState.Uninitialized;
     public ConfigEntry<string> LastFetchTime { get; private set; }
-    public ConfigEntry<bool> IsEnabled { get; private set; }
-    public virtual List<ConfigEntryBase> Settings { get; set; } = [];
+    public ModdedBoolOption IsEnabled { get; private set; }
+    public virtual List<ModdedOption> Options { get; set; } = [];
     public string GetCachedDataPath()
     {
         return Path.Combine(
@@ -33,8 +34,7 @@ public abstract class BanListProvider
         LastFetchTime =
             HostUtilityPlugin.Instance.Config.Bind("Ban List Providers - " + Name, "Last Fetch Time",
                 "");
-        IsEnabled = HostUtilityPlugin.Instance.Config.Bind("Ban List Providers - " + Name,
-            "Is Enabled", true);
+        IsEnabled = new ModdedBoolOption($"Use {Name} Ban List", false);
         var dataPath = GetCachedDataPath();
 
         bool fetchedToday = LastFetchTime.Value != string.Empty
@@ -55,6 +55,7 @@ public abstract class BanListProvider
                 Logger.GlobalInstance.Warning($"Cached {Name} BanList data was unreadable, refetching: {ex.Message}");
             }
         }
+        Options.Add(IsEnabled);
 
         AmongUsClient.Instance.StartCoroutine(CoLoadFromCloud().WrapToIl2Cpp());
     }

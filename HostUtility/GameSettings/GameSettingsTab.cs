@@ -12,7 +12,7 @@ public abstract class GameSettingsTab
     public abstract List<OptionGroup> OptionGroups { get; }
     public virtual void CreateSettings(GameOptionsMenu gameOptionsMenu, Transform parentTransform, out float y)
     {
-        y = 0;
+        y = 2.6f;
         foreach (var optionGroup in OptionGroups)
         {
             optionGroup.Create(gameOptionsMenu, parentTransform, ref y);
@@ -21,17 +21,5 @@ public abstract class GameSettingsTab
     }
     public virtual void OnCreate(GameOptionsMenu menu, Transform parentTransform, ref float y)
     {
-    }
-
-    public virtual void Initialize()
-    {
-        var config = HostUtilityPlugin.Instance.Config;
-        foreach (var optionGroup in OptionGroups)
-        {
-            foreach (var option in optionGroup.Options)
-            {
-                option.Bind(optionGroup.Name, config);
-            }
-        }
     }
 }

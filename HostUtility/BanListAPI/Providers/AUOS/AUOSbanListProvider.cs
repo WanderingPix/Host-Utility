@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using BepInEx.Configuration;
 using HostUtility.AUOS.API;
+using HostUtility.GameSettings.OptionTypes;
 using InnerNet;
 
 using UnityEngine;
@@ -20,12 +21,11 @@ public class AUOSbanListProvider : BanListProvider
 
     public override string Name => "Among Us Online Safety";
     public override string Owner => "WanderingPixel, CloneC";
-    public ConfigEntry<float> MinimumHonor;
+    public ModdedNumberOption MinimumHonor;
     public override void Initialize()
     {
-        MinimumHonor =
-            HostUtilityPlugin.Instance.Config.Bind("Ban List Providers - " + Name, "Minimum Honor", 40f);
-        Settings.Add(MinimumHonor);
+        MinimumHonor = new ModdedNumberOption("Minimum Honor", 50, 10, 100, 5);
+        Options.Add(MinimumHonor);
         base.Initialize();
     }
 

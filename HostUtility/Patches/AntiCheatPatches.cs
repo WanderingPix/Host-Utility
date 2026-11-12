@@ -3,6 +3,7 @@ using HarmonyLib;
 using HostUtility.Components;
 using InnerNet;
 using Hazel;
+using HostUtility.GameSettings;
 using UnityEngine;
 
 namespace HostUtility.Patches;
@@ -17,6 +18,7 @@ public class AntiCheatPatch
     public static void PlayerControl_MurderPlayer_Postfix(PlayerControl __instance)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+        if (!SettingTabSingleton<AnticheatTab>.Instance.RestrictMurderRPC.Value) return;
         var trackingData = __instance.GetComponent<TrackingDataBehaviour>();
         if (trackingData.timeSinceLastMurder < 0.25f)
         {
@@ -33,6 +35,7 @@ public class AntiCheatPatch
     public static void PlayerControl_SetColor_Postfix(PlayerControl __instance)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+        if (!SettingTabSingleton<AnticheatTab>.Instance.RestrictSetColorRPC.Value) return;
         var trackingData = __instance.GetComponent<TrackingDataBehaviour>();
         if (trackingData.timeSinceLastSetColor < 0.25f)
         {
@@ -61,6 +64,7 @@ public class AntiCheatPatch
     {
         var amongUsClient = AmongUsClient.Instance;
         if (!amongUsClient.AmHost) return true;
+        if (!SettingTabSingleton<AnticheatTab>.Instance.RestrictMeetingRPC.Value) return true;
         
         bool isCheating = false;
         string reason = "";
@@ -109,11 +113,12 @@ public class AntiCheatPatch
     public static void ChatController_AddChat_Postfix(ChatController __instance, ref PlayerControl sourcePlayer)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+        if (!SettingTabSingleton<AnticheatTab>.Instance.EnforceMessageCooldowns.Value) return;
         if (!MessageCooldowns.TryGetValue(sourcePlayer, out var cooldown))
         {
             MessageCooldowns.Add(sourcePlayer, 0);
         }
-        else if (cooldown > 0f && HostUtilityPlugin.Instance.CheckMessageCooldowns.Value)
+        else if (cooldown > 0f)
         {
             AmongUsClient.Instance.KickWithReason(sourcePlayer.Data.ClientId, "Bypassing message cooldowns", true);
         }
@@ -136,6 +141,7 @@ public class AntiCheatPatch
     public static void PlayerControl_HandleRpc_Prefix(PlayerControl __instance, ref byte callId, ref MessageReader reader)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+        if (!SettingTabSingleton<AnticheatTab>.Instance.CheckCheatRPCs.Value) return;
         foreach (byte cheatCallId in CheatRpcDictionary.Keys)
         {
             if (callId == cheatCallId)

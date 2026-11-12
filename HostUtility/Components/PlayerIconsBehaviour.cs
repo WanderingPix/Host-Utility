@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using HostUtility.GameSettings;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -45,7 +46,8 @@ public class PlayerIconsBehaviour(IntPtr iPtr) : MonoBehaviour(iPtr)
     public GameObject IdIcon;
     public GameObject HostIcon;
     public GameObject PlatformIcon;
-    private PlayerControl owner;
+    public GameObject ModdedIcon;
+    public PlayerControl owner;
     public void Initialize(PlayerControl owner)
     {
         this.owner = owner;
@@ -75,6 +77,10 @@ public class PlayerIconsBehaviour(IntPtr iPtr) : MonoBehaviour(iPtr)
         identifier.iconRenderer.color = Color.white;
         owner.StartCoroutine(Effects.ActionAfterDelay(0.05f, new System.Action(() =>
             identifier.gameObject.transform.localScale = new Vector3(1.5f, 1.5f, 1))));
+
+        ModdedIcon = Instantiate(HostIcon, transform);
+        ModdedIcon.transform.GetChild(1).GetComponent<TextMeshPro>().text = "HU";
+        ModdedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 0, 0.2f, 1);
         
         var shader = Shader.Find("Sprites/Default");
         foreach (var rend in identifier.GetComponentsInChildren<SpriteRenderer>())
@@ -87,16 +93,19 @@ public class PlayerIconsBehaviour(IntPtr iPtr) : MonoBehaviour(iPtr)
         {
             go.gameObject.layer = 0;
         }
-        
-        IdIcon.SetActive(HostUtilityPlugin.Instance.ShowPlayerIDs.Value);
-        PlatformIcon.SetActive(HostUtilityPlugin.Instance.ShowPlayerPlatforms.Value); 
+
+        var opts = SettingTabSingleton<AdvancedTab>.Instance;
+        IdIcon.SetActive(opts.ShowPlayerIDs.Value);
+        PlatformIcon.SetActive(opts.ShowPlayerPlatforms.Value); 
         HostIcon.SetActive(AmongUsClient.Instance.GetHost().Character == owner);
-        
+        LevelIcon.gameObject.SetActive(opts.ShowPlayerLevels.Value);
+        ModdedIcon.gameObject.SetActive(false);
         LevelIcon.transform.localScale = HostIcon.transform.localScale = IdIcon.transform.localScale = PlatformIcon.transform.localScale = Vector3.zero;
         owner.StartCoroutine(Effects.Bloop(0, LevelIcon.transform, 0.3f, 0.3f));
         owner.StartCoroutine(Effects.Bloop(0.2f, IdIcon.transform, 0.3f, 0.3f));
         owner.StartCoroutine(Effects.Bloop(0.4f, HostIcon.transform, 0.3f, 0.3f));
         owner.StartCoroutine(Effects.Bloop(0.6f, PlatformIcon.transform, 0.3f, 0.3f));
+        owner.StartCoroutine(Effects.Bloop(0.6f, ModdedIcon.transform, 0.3f, 0.3f));
     }
 
     private void FixedUpdate()

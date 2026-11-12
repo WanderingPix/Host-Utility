@@ -1,5 +1,6 @@
 using System.Linq;
 using HarmonyLib;
+using HostUtility.GameSettings;
 using InnerNet;
 using TMPro;
 using UnityEngine;
@@ -55,8 +56,8 @@ public class PlayerVoteAreaPatches
         }
         identifier.transform.localScale = hostIcon.transform.localScale;
         
-        idIcon.SetActive(HostUtilityPlugin.Instance.ShowPlayerIDs.Value);
-        platformIcon.SetActive(HostUtilityPlugin.Instance.ShowPlayerPlatforms.Value); 
+        idIcon.SetActive(SettingTabSingleton<AdvancedTab>.Instance.ShowPlayerIDs.Value);
+        platformIcon.SetActive(SettingTabSingleton<AdvancedTab>.Instance.ShowPlayerPlatforms.Value); 
         hostIcon.SetActive(AmongUsClient.Instance.GetHost().Character == owner);
 
         __instance.Flag.transform.localPosition = new Vector3(1.313f, -0.186f, -3);

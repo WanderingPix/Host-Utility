@@ -1,7 +1,11 @@
 using System.Collections.Generic;
+using System.Linq;
+using AmongUs.GameOptions;
 using HarmonyLib;
+using Hazel;
 using HostUtility.BanListAPI;
 using HostUtility.Components;
+using HostUtility.GameSettings;
 using UnityEngine;
 
 namespace HostUtility.Patches;
@@ -20,17 +24,19 @@ public class PlayerControlPatches
             new System.Action(() => iconContainer.AddComponent<PlayerIconsBehaviour>().Initialize(__instance))));
         
         __instance.gameObject.AddComponent<TrackingDataBehaviour>().myPlayer = __instance;
-        if (!AmongUsClient.Instance.AmHost) return;
-        var plugin = HostUtilityPlugin.Instance;
-        if (__instance == PlayerControl.LocalPlayer) return;
         __instance.StartCoroutine(Effects.ActionAfterDelay(1f, new System.Action(() =>
         {
-            if (__instance == PlayerControl.LocalPlayer) return;
+            if (__instance == PlayerControl.LocalPlayer)
+            {
+                __instance.RpcHandshake();
+                return;
+            }
             
-            if (BanWords.ContainsSwear(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Inappropriate username",true);
-            if (BotNames.Names.Contains(__instance.Data.PlayerName) && plugin.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Bot Player",true);
+            if (!AmongUsClient.Instance.AmHost) return;
+            if (BanWords.ContainsSwear(__instance.Data.PlayerName) && SettingTabSingleton<ModerationTab>.Instance.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Inappropriate username",true);
+            if (BotNames.Names.Contains(__instance.Data.PlayerName) && SettingTabSingleton<ModerationTab>.Instance.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Bot Player",true);
             if (RemoveInvisibleCharacters(__instance.Data.PlayerName).Trim() == string.Empty) __instance.RpcSetName("Unknown Player");
-            if (__instance.Data.PlayerLevel < plugin.MinLevel.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Low level",false);
+            if (__instance.Data.PlayerLevel < SettingTabSingleton<ModerationTab>.Instance.PlayerLevelCap.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Low level",false);
             if (BanListManager.IsTargetOnBanList(AmongUsClient.Instance.GetClientFromCharacter(__instance), out string banReason, out string banListName)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, banReason, banListName, false);
             if (FriendsListManager.Instance.IsPlayerBlocked(AmongUsClient.Instance.GetClient(__instance.Data.ClientId).ProductUserId)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Blocked player", false);
         })));
@@ -122,5 +128,32 @@ public class PlayerControlPatches
         }
 
         return result;
+    }
+    
+    [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
+    [HarmonyPostfix]
+    public static void PlayerControl_HandleRpc_Prefix(PlayerControl __instance, ref byte callId, ref MessageReader reader)
+    {
+        switch (callId)
+        {
+            //Modded client handshake
+            case 100:
+                HandshakeManager.ModdedPlayers.Add(__instance);
+                PlayerIconsBehaviour.AllIcons.Find(x => x.owner == __instance)?.ModdedIcon.SetActive(true);
+                break;
+            //Request to set settings
+            case 101:
+                if (TrackingDataBehaviour.Local.permissions >= Permissions.HostPermissions) break;
+                var options = GameOptionsManager.Instance.gameOptionsFactory.FromBytes(reader.ReadBytesAndSize());
+                GameOptionsManager.Instance.CurrentGameOptions = options;
+                GameManager.Instance.LogicOptions.SyncOptions(); // real host, so the gate passes
+                HostUtilityPlugin.Instance.Log.LogInfo("DING DING DING!!! SYNCED!!!");
+                break;
+            case 102:
+                var playerId = reader.ReadByte();
+                var player = PlayerControl.AllPlayerControls.ToArray().ToList().Find(x => x.Data.PlayerId == playerId);
+                TrackingDataBehaviour.Get(player).SetPermissions(reader.ReadInt32());
+                break;
+        }
     }
 }

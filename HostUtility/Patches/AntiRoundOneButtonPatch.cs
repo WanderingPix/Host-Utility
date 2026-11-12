@@ -1,4 +1,5 @@
 using HarmonyLib;
+using HostUtility.GameSettings;
 
 namespace HostUtility.Patches;
 
@@ -11,7 +12,7 @@ public static class AntiRoundOneButtonPatch
     [HarmonyPrefix]
     public static bool ReportDeadBody_Prefix(PlayerControl __instance, NetworkedPlayerInfo target)
     {
-        if (!HostUtilityPlugin.Instance.DisableR1Meetings.Value) return true;
+        if (!SettingTabSingleton<ModerationTab>.Instance.DisableR1ButtonPresses.Value) return true;
         if (CurrentRound == 1 && !__instance.AmOwner && AmongUsClient.Instance.AmHost && target == null)
         {
             HudManager.Instance.Notifier.AddDisconnectMessage($"Player {target.PlayerName} has tried pressing the meeting button round 1!");
