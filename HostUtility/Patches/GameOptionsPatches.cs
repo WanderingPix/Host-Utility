@@ -3,6 +3,7 @@ using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
 using HostUtility.Components;
+using HostUtility.Utilities;
 using InnerNet;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -17,7 +18,7 @@ public class GameOptionsPatches
     [HarmonyPrefix]
     public static void SendToHost()
     {
-        if (TrackingDataBehaviour.Local.permissions == Permissions.CoHostPermissions)
+        if (PlayerControl.LocalPlayer.CanModifySettings())
         {
             var w = AmongUsClient.Instance.StartRpcImmediately(
                 PlayerControl.LocalPlayer.NetId, 101, SendOption.Reliable, AmongUsClient.Instance.HostId);
@@ -33,7 +34,7 @@ public class GameOptionsPatches
         if (__instance.RulesEditPanel != null)
             return false;
         PlayerControl localPlayer = PlayerControl.LocalPlayer;
-        if (TrackingDataBehaviour.Local.permissions < Permissions.CoHostPermissions)
+        if (!PlayerControl.LocalPlayer.CanModifySettings())
             return false;
         localPlayer.NetTransform.Halt();
         __instance.RulesEditPanel = Object.Instantiate<GameObject>(__instance.PlayerOptionsMenu);
@@ -52,6 +53,8 @@ public class GameOptionsPatches
     [HarmonyPostfix]
     public static void AmHost(ref bool __result)
     {
-        if (TrackingDataBehaviour.Local?.permissions >= Permissions.CoHostPermissions) __result = true;
+        if (__result) return;
+        if (PlayerControl.LocalPlayer == null) return;
+        if (PlayerControl.LocalPlayer.CanModifySettings()) __result = true;
     }
 }

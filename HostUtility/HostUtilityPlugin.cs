@@ -37,6 +37,7 @@ public partial class HostUtilityPlugin : BasePlugin
         Harmony.PatchAll();
         
         ClassInjector.RegisterTypeInIl2Cpp<PlayerIconsBehaviour>();
+        ClassInjector.RegisterTypeInIl2Cpp<NumberOptionUnlocker>();
         ClassInjector.RegisterTypeInIl2Cpp<TrackingDataBehaviour>();
         ClassInjector.RegisterTypeInIl2Cpp<CommandArgumentsMenu>();
         ClassInjector.RegisterTypeInIl2Cpp<CommandSuggestionMenu>();
@@ -47,7 +48,6 @@ public partial class HostUtilityPlugin : BasePlugin
         
         UseHostAuthority = Config.Bind<bool>("Advanced", "Use Host Authority", true);
         
-        GameSettingsManager.Initialize();
         HostUtilityDirectories.InitializeDirectories();
         Log.LogInfo("Host Utility loaded successfully! :D");
     }

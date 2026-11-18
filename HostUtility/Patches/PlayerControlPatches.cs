@@ -6,6 +6,7 @@ using Hazel;
 using HostUtility.BanListAPI;
 using HostUtility.Components;
 using HostUtility.GameSettings;
+using HostUtility.Utilities;
 using UnityEngine;
 
 namespace HostUtility.Patches;
@@ -143,16 +144,32 @@ public class PlayerControlPatches
                 break;
             //Request to set settings
             case 101:
-                if (TrackingDataBehaviour.Local.permissions >= Permissions.HostPermissions) break;
-                var options = GameOptionsManager.Instance.gameOptionsFactory.FromBytes(reader.ReadBytesAndSize());
-                GameOptionsManager.Instance.CurrentGameOptions = options;
-                GameManager.Instance.LogicOptions.SyncOptions(); // real host, so the gate passes
+            {
+                var c = AmongUsClient.Instance;
+                if (c.HostId != c.ClientId) break;
+                if (__instance.CanModifySettings()) break;
+                HostUtilityPlugin.Instance.Log.LogInfo($"[101] from {__instance.PlayerId}");
+
+                GameManager.Instance.LogicOptions.Deserialize(reader);
+                GameOptionsManager.Instance.GameHostOptions = GameOptionsManager.Instance.CurrentGameOptions;
+                GameManager.Instance.LogicOptions.SyncOptions();
                 HostUtilityPlugin.Instance.Log.LogInfo("DING DING DING!!! SYNCED!!!");
                 break;
+            }
             case 102:
                 var playerId = reader.ReadByte();
                 var player = PlayerControl.AllPlayerControls.ToArray().ToList().Find(x => x.Data.PlayerId == playerId);
-                TrackingDataBehaviour.Get(player).SetPermissions(reader.ReadInt32());
+                TrackingDataBehaviour.Get(player).SetPermissions((Permissions)reader.ReadInt32());
+                break;
+            case 103:
+                var playerId2 = reader.ReadByte();
+                var player2 = PlayerControl.AllPlayerControls.ToArray().ToList().Find(x => x.Data.PlayerId == playerId2);
+                if (player2.CanStartGame()) GameStartManager.Instance?.BeginGame();
+                break;
+            case 104:
+                var playerId3 = reader.ReadByte();
+                var player3 = PlayerControl.AllPlayerControls.ToArray().ToList().Find(x => x.Data.PlayerId == playerId3);
+                TrackingDataBehaviour.Get(player3).SetPermissions((Permissions)reader.ReadInt32());
                 break;
         }
     }

@@ -1,7 +1,9 @@
 using AmongUs.Data;
 using HarmonyLib;
+using Hazel;
 using HostUtility.Components;
 using HostUtility.GameSettings;
+using HostUtility.Utilities;
 
 namespace HostUtility.Patches;
 
@@ -44,6 +46,20 @@ public static class GameStartManagerPatches
         __instance.startState = GameStartManager.StartingStates.Countdown;
         AmongUsClient.Instance.KickNotJoinedPlayers();
         return false;
+    }
+    
+    [HarmonyPatch(nameof(GameStartManager.BeginGame))]
+    [HarmonyPrefix]
+    public static bool GameStartManager_Begin_Prefix(GameStartManager __instance)
+    {
+        if (PlayerControl.LocalPlayer.CanStartGame())
+        {
+            var w = AmongUsClient.Instance.StartRpcImmediately(
+                PlayerControl.LocalPlayer.NetId, 103, SendOption.Reliable, AmongUsClient.Instance.HostId);
+            AmongUsClient.Instance.FinishRpcImmediately(w);
+            return false;
+        }
+        return true;
     }
 
     [HarmonyPatch(nameof(GameStartManager.FinallyBegin))]

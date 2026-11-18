@@ -11,6 +11,9 @@ public static class HostUtilityAssets
     private static AssetBundle _bundle;
     public static GameObject SuggestionsMenuPrefab;
     public static GameObject ArgumentsMenuPrefab;
+    public static Sprite KickButtonSprite;
+    public static Sprite LockOptionSprite;
+    public static Sprite UnlockOptionSprite;
 
     public static void Initialize()
     {
@@ -21,10 +24,19 @@ public static class HostUtilityAssets
         _bundle = AssetBundle.LoadFromMemory(fs.ReadBytes());
         SuggestionsMenuPrefab = _bundle.LoadAsset("CommandSuggestionMenu").TryCast<GameObject>();
         ArgumentsMenuPrefab = _bundle.LoadAsset("CommandArgumentsMenu").TryCast<GameObject>();
-        SuggestionsMenuPrefab?.hideFlags = HideFlags.DontUnloadUnusedAsset;
-        ArgumentsMenuPrefab?.hideFlags = HideFlags.DontUnloadUnusedAsset;
-        _bundle.hideFlags = HideFlags.DontUnloadUnusedAsset;
-
+        KickButtonSprite = SpriteTools.LoadSpriteFromPath("HostUtility.Resources.KickButton.png", typeof(HostUtilityAssets).Assembly, 100);
+        LockOptionSprite = SpriteTools.LoadSpriteFromPath("HostUtility.Resources.LockButton.png", typeof(HostUtilityAssets).Assembly, 100);
+        UnlockOptionSprite = SpriteTools.LoadSpriteFromPath("HostUtility.Resources.UnlockButton.png", typeof(HostUtilityAssets).Assembly, 100);
+        if (!_bundle || !SuggestionsMenuPrefab || !ArgumentsMenuPrefab || !KickButtonSprite || !LockOptionSprite ||
+            !UnlockOptionSprite) return;
+        _bundle.hideFlags = 
+            ArgumentsMenuPrefab.hideFlags = 
+                ArgumentsMenuPrefab.hideFlags = 
+                    SuggestionsMenuPrefab.hideFlags = 
+                        KickButtonSprite.hideFlags = 
+                            LockOptionSprite.hideFlags =
+                                UnlockOptionSprite.hideFlags =
+                                    HideFlags.DontUnloadUnusedAsset;
         if (!Directory.Exists(HostUtilityDirectories.RulesetsPath))
         {
             Directory.CreateDirectory(HostUtilityDirectories.RulesetsPath);

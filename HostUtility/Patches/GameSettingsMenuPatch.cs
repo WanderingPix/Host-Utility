@@ -23,12 +23,24 @@ public class GameSettingsMenuPatch
     [HarmonyPostfix]
     public static void GameSettingMenu_Start_Postfix(GameSettingMenu __instance)
     {
-        //FixScroller(__instance, y);
+        Menus.Clear();
+        void ShowMenu(GameObject menu)
+        {
+            foreach (var menu2 in Menus)
+            {
+                menu2.SetActive(false);
+            }
+            menu.gameObject.SetActive(true);
+        }
         Menus = [
             __instance.GameSettingsTab.gameObject,
             __instance.PresetsTab.gameObject,
             __instance.RoleSettingsTab.gameObject
         ];
+        __instance.GameSettingsButton.OnClick.AddListener(new Action(() => ShowMenu(__instance.GameSettingsTab.gameObject)));
+        __instance.RoleSettingsButton.OnClick.AddListener(new Action(() => ShowMenu(__instance.RoleSettingsTab.gameObject)));
+        __instance.GamePresetsButton.OnClick.AddListener(new Action(() => ShowMenu(__instance.PresetsTab.gameObject)));
+        
         var leftPanel = __instance.transform.Find("LeftPanel").gameObject;
         var firstPage = new GameObject("Page 1");
         firstPage.transform.parent = leftPanel.transform;
@@ -83,6 +95,10 @@ public class GameSettingsMenuPatch
         GameObject currentPage = null!;
         foreach (var tab in GameSettingsManager.Tabs)
         {
+            if (i >= 3)
+            {
+                i = 0;
+            }
             if (i == 0)
             {
                 currentPage?.gameObject.SetActive(false);
@@ -104,38 +120,44 @@ public class GameSettingsMenuPatch
             tab.CreateSettings(menu, menu.settingsContainer, out float y);
             FixScroller(menu.scrollBar, y);
             
-            button.OnClick.AddListener(new Action(() =>
-            {
-                foreach (var menu2 in Menus)
-                {
-                    menu2.SetActive(false);
-                }
-                menu.gameObject.SetActive(true);
-            }));
-            if (i >= 3)
-            {
-                i = 0;
-            }
+            button.OnClick.AddListener(new Action(() => ShowMenu(menu.gameObject)));
             i++;
         }
-    }
-
-    private static float GetLowestActiveY(GameOptionsMenu __instance)
-    {
-        var active = __instance.Children
-            .ToArray().Where(c => c != null && c.gameObject.activeSelf)
-            .ToArray();
-
-        if (active.Length == 0)
-        {
-            return __instance.Children.ToArray().Last().transform.localPosition.y;
-        }
-
-        return active.Min(c => c.transform.localPosition.y);
     }
 
     private static void FixScroller(Scroller scroller, float y)
     {
         scroller.SetYBoundsMax(- y - 1.65f);
     }
+
+    [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.CreateSettings))]
+    [HarmonyPostfix]
+    public static void CreateSettingsPostfix(GameOptionsMenu __instance)
+    {
+        foreach (var option in __instance.Children)
+        {
+            var numOption = option.TryCast<NumberOption>();
+            if (numOption != null && !LockedIntOptions.Contains(numOption.intOptionName))
+            {
+                var unlockBtn = Object.Instantiate(numOption.buttons[1], numOption.buttons[1].transform.parent, true);
+                unlockBtn.transform.localPosition += Vector3.right*1.75f;
+                unlockBtn.OnClick = new Button.ButtonClickedEvent();
+                var range = new FloatRange(0, int.MaxValue); //Default
+                if (FloatRanges.TryGetValue(numOption.floatOptionName, out var specifiedRange))
+                {
+                    range = specifiedRange;
+                }
+                unlockBtn.gameObject.AddComponent<NumberOptionUnlocker>().Init(numOption, range);
+            }
+        }
+    }
+
+    private static readonly List<Int32OptionNames> LockedIntOptions = [
+        Int32OptionNames.NumImpostors
+    ];
+    
+    private static readonly Dictionary<FloatOptionNames, FloatRange> FloatRanges = new Dictionary<FloatOptionNames, FloatRange>()
+    {
+        { FloatOptionNames.KillCooldown , new FloatRange(0.01f, int.MaxValue) }
+    };
 }

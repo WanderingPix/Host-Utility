@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using HostUtility.Utilities;
+using InnerNet;
 using UnityEngine;
 
 namespace HostUtility.Components;
@@ -6,22 +8,23 @@ namespace HostUtility.Components;
 public class TrackingDataBehaviour : MonoBehaviour
 {
     public List<string> chatMessages = new();
-    public int permissions = 0;
+    public Permissions permissions = 0;
     public static TrackingDataBehaviour Local;
     public PlayerControl myPlayer;
     private static Dictionary<PlayerControl, TrackingDataBehaviour> Data = new();
 
     public static TrackingDataBehaviour Get(PlayerControl player)
     {
-        return Data[player];
+        if (player.AmOwner) return Local;
+        return Data.GetValueOrDefault(player);
     }
     private void Start()
     {
         if (myPlayer.AmOwner)
         {
             Local = this;
-            if (AmongUsClient.Instance.AmHost) permissions = Permissions.HostPermissions;
         }
+        if (AmongUsClient.Instance.AmHost) permissions = Permissions.Host;
         Data.Add(myPlayer, this);
     }
     public float timeSinceLastSetColor = 1;
@@ -35,15 +38,36 @@ public class TrackingDataBehaviour : MonoBehaviour
         timeSinceLastMurder += Time.deltaTime;
     }
 
-    public void SetPermissions(int value)
+    public void SetPermissions(Permissions value)
     {
         permissions = value;
-        if (permissions >= Permissions.CoHostPermissions)
+        if (myPlayer.AmOwner)
         {
-            var infoPane = GameStartManager.Instance?.LobbyInfoPane;
-            infoPane.HostViewButton.gameObject.SetActive(true);
-            GameStartManager.Instance?.ClientInfoPanelButtons.gameObject.SetActive(true);
-            GameStartManager.Instance?.HostInfoPanelButtons.gameObject.SetActive(true);
+            bool showSettings = !myPlayer.CanModifySettings();
+            var startManager = GameStartManager.Instance;
+            string gameName = GameCode.IntToGameName(AmongUsClient.Instance.GameId);
+            if (showSettings)
+            {
+                startManager.HostPrivacyButtons.gameObject.SetActive(false);
+                startManager.ClientPrivacyValue.gameObject.SetActive(true);
+                startManager.StartButton.gameObject.SetActive(false);
+                startManager.StartButtonClient.gameObject.SetActive(true);
+                startManager.GameStartTextParent.SetActive(false);
+                startManager.HostInfoPanelButtons.gameObject.SetActive(false);
+                startManager.ClientInfoPanelButtons.gameObject.SetActive(true);
+            }
+            else
+            {
+                if (gameName != null)
+                {
+                    startManager.HostPrivacyButtons.gameObject.SetActive(true);
+                    startManager.ClientPrivacyValue.gameObject.SetActive(false);
+                }
+                startManager.HostInfoPanelButtons.gameObject.SetActive(true);
+                startManager.ClientInfoPanelButtons.gameObject.SetActive(false);
+                startManager.StartButton.gameObject.SetActive(true);
+                startManager.StartButtonClient.gameObject.SetActive(false);
+            }
         }
     }
 }

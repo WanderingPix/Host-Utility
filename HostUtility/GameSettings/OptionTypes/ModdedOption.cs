@@ -8,7 +8,7 @@ namespace HostUtility.GameSettings.OptionTypes;
 public abstract class ModdedOption
 {
     public string Name;
-    public bool Init = false;
+    protected bool Init = false;
     public abstract Type OptionType { get; }
     public abstract GameObject Create(GameOptionsMenu menu, Transform parentTransform, ref float y);
     public abstract void Bind(string groupName);
@@ -37,5 +37,6 @@ public abstract class ModdedOption<T> : ModdedOption
         HostUtilityPlugin.Instance.Log.LogInfo($"Binding {OptionType.ToString()} option {Name}...");
         ConfigEntry = HostUtilityPlugin.Instance.Config.Bind(OptionType.Name + " Options", Name, DefaultValue);
         HostUtilityPlugin.Instance.Log.LogInfo($"Bound {OptionType.ToString()} option {Name}...");
+        Init = true;
     }
 }
