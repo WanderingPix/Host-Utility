@@ -8,7 +8,7 @@ namespace HostUtility.Components;
 public class TrackingDataBehaviour : MonoBehaviour
 {
     public List<string> chatMessages = new();
-    public Permissions permissions = 0;
+    public Permissions permissions = Permissions.Player;
     public static TrackingDataBehaviour Local;
     public PlayerControl myPlayer;
     private static Dictionary<PlayerControl, TrackingDataBehaviour> Data = new();

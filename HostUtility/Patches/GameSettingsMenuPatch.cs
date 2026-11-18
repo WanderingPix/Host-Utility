@@ -148,6 +148,12 @@ public class GameSettingsMenuPatch
                     range = specifiedRange;
                 }
                 unlockBtn.gameObject.AddComponent<NumberOptionUnlocker>().Init(numOption, range);
+
+                if (numOption.floatOptionName == FloatOptionNames.Invalid) return;
+                var incrementButton = Object.Instantiate(numOption.buttons[1], numOption.buttons[1].transform.parent, true);
+                incrementButton.transform.localPosition += Vector3.right;
+                incrementButton.OnClick = new Button.ButtonClickedEvent();
+                incrementButton.gameObject.AddComponent<NumberOptionDivider>().Init(numOption);
             }
         }
     }

@@ -38,6 +38,7 @@ public partial class HostUtilityPlugin : BasePlugin
         
         ClassInjector.RegisterTypeInIl2Cpp<PlayerIconsBehaviour>();
         ClassInjector.RegisterTypeInIl2Cpp<NumberOptionUnlocker>();
+        ClassInjector.RegisterTypeInIl2Cpp<NumberOptionDivider>();
         ClassInjector.RegisterTypeInIl2Cpp<TrackingDataBehaviour>();
         ClassInjector.RegisterTypeInIl2Cpp<CommandArgumentsMenu>();
         ClassInjector.RegisterTypeInIl2Cpp<CommandSuggestionMenu>();

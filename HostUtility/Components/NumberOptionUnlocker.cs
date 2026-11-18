@@ -18,9 +18,10 @@ public class NumberOptionUnlocker(IntPtr ptr) : MonoBehaviour(ptr)
         _button = GetComponent<GameOptionButton>();
         _button.SetInteractable(true);
         _button.transform.GetChild(0).gameObject.SetActive(false);
-        _state = _option.Value > _range.min && _option.Value < _range.max;
+        _state = _option.Value < _range.min && _option.Value > _range.max;
         _button.buttonSprite.sprite = _state ? HostUtilityAssets.UnlockOptionSprite : HostUtilityAssets.LockOptionSprite;
-
+        if (_state) _option.ValidRange = _range;
+        option.AdjustButtonsActiveState();
         _button.OnClick.AddListener(new Action(Toggle));
     }
 
