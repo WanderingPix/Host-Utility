@@ -29,6 +29,7 @@ public class RulesetEditTab(IntPtr ptr) : MonoBehaviour(ptr)
         bubbleTextBox.OnFocusLost  = new Button.ButtonClickedEvent();
         bubbleTextBox.allowAllCharacters = true;
         bubbleTextBox.characterLimit = 250;
+        bubble.TextArea.rectTransform.sizeDelta *= new Vector2(1.5f, 1);
         bubble.NameText.m_enableWordWrapping = true;
         bubbleTextBox.Pipe = Instantiate(HudManager.Instance.Chat.freeChatField.textArea.Pipe, bubbleTextBox.transform);
         bubbleTextBox.pipeBlinkTimer = 0.7f;

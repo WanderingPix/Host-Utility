@@ -1,4 +1,5 @@
 using Hazel;
+using HostUtility.Components;
 
 namespace HostUtility;
 
@@ -11,5 +12,6 @@ public static class Networking
         w.Write(player.Data.PlayerId);
         w.Write((uint)permissionsLevel);
         AmongUsClient.Instance.FinishRpcImmediately(w);
+        TrackingDataBehaviour.Get(player).SetPermissions(permissionsLevel);
     }
 }

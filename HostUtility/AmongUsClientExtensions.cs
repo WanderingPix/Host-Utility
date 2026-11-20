@@ -28,7 +28,7 @@ public static class AmongUsClientExtensions
         var client = AmongUsClient.Instance.GetClient(clientId);
         if (client.Character && client.Character.AmOwner) return;
         if (FriendsListManager.Instance.IsPlayerFriend(client.ProductUserId)) return;
-        AmongUsClient.Instance.KickWithReason(clientId, reason, ban);
+        AmongUsClient.Instance.KickPlayer(clientId, ban);
         if (HudManager.Instance)
         {
             string punishment = ban ? "banned" : "kicked";

@@ -39,10 +39,12 @@ public class ModerationTab : GameSettingsTab
         base.CreateSettings(gameOptionsMenu, parentTransform, out y);
         foreach (var banList in BanListManager.Providers)
         {
+            var options = banList.Options;
+            if (!options.Contains(banList.IsEnabled)) options.Add(banList.IsEnabled);
             var group = new OptionGroup()
             {
                 Name = banList.Name + " Ban List",
-                Options = banList.Options
+                Options = options
             };
             group.Create(gameOptionsMenu, parentTransform, ref y);
         }

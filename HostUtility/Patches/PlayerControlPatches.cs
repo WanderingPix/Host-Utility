@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
@@ -14,163 +15,207 @@ namespace HostUtility.Patches;
 [HarmonyPatch]
 public class PlayerControlPatches
 {
+    private const float StartupDelay = 1f;
+
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Start))]
     [HarmonyPostfix]
     public static void PlayerControl_Start_Postfix(PlayerControl __instance)
     {
-        var iconContainer = new GameObject("IconContainer");
-        iconContainer.transform.SetParent(__instance.cosmetics.nameTextContainer.transform);
-        iconContainer.transform.localPosition = __instance.cosmetics.nameText.transform.localPosition + new Vector3(0, 0.35f, 0);
-        __instance.StartCoroutine(Effects.ActionAfterDelay(1f,
-            new System.Action(() => iconContainer.AddComponent<PlayerIconsBehaviour>().Initialize(__instance))));
-        
-        __instance.gameObject.AddComponent<TrackingDataBehaviour>().myPlayer = __instance;
-        __instance.StartCoroutine(Effects.ActionAfterDelay(1f, new System.Action(() =>
+        if (__instance == null) return;
+
+        var nameContainer = __instance.cosmetics?.nameTextContainer;
+        var nameText = __instance.cosmetics?.nameText;
+        if (nameContainer != null && nameText != null)
         {
+            var iconContainer = new GameObject("IconContainer");
+            iconContainer.transform.SetParent(nameContainer.transform);
+            iconContainer.transform.localPosition = nameText.transform.localPosition + new Vector3(0, 0.35f, 0);
+
+            __instance.StartCoroutine(Effects.ActionAfterDelay(StartupDelay, new Action(() =>
+            {
+                if (iconContainer == null || __instance == null) return;
+                iconContainer.AddComponent<PlayerIconsBehaviour>().Initialize(__instance);
+            })));
+        }
+
+        __instance.gameObject.AddComponent<TrackingDataBehaviour>().myPlayer = __instance;
+
+        __instance.StartCoroutine(Effects.ActionAfterDelay(StartupDelay, new Action(() =>
+        {
+            if (__instance == null) return;
+
             if (__instance == PlayerControl.LocalPlayer)
             {
                 __instance.RpcHandshake();
                 return;
             }
-            
-            if (!AmongUsClient.Instance.AmHost) return;
-            if (BanWords.ContainsSwear(__instance.Data.PlayerName) && SettingTabSingleton<ModerationTab>.Instance.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Inappropriate username",true);
-            if (BotNames.Names.Contains(__instance.Data.PlayerName) && SettingTabSingleton<ModerationTab>.Instance.BanInappropriateNames.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Bot Player",true);
-            if (RemoveInvisibleCharacters(__instance.Data.PlayerName).Trim() == string.Empty) __instance.RpcSetName("Unknown Player");
-            if (__instance.Data.PlayerLevel < SettingTabSingleton<ModerationTab>.Instance.PlayerLevelCap.Value) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Low level",false);
-            if (BanListManager.IsTargetOnBanList(AmongUsClient.Instance.GetClientFromCharacter(__instance), out string banReason, out string banListName)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, banReason, banListName, false);
-            if (FriendsListManager.Instance.IsPlayerBlocked(AmongUsClient.Instance.GetClient(__instance.Data.ClientId).ProductUserId)) AmongUsClient.Instance.KickWithReason(__instance.Data.ClientId, "Blocked player", false);
+
+            RunHostChecks(__instance);
         })));
     }
 
-    public static readonly List<string> InvisibleCharacters = new List<string>
+    private static void RunHostChecks(PlayerControl player)
     {
-        "\u0000", // NULL
-        "\u0001", // START OF HEADING
-        "\u0002", // START OF TEXT
-        "\u0003", // END OF TEXT
-        "\u0004", // END OF TRANSMISSION
-        "\u0005", // ENQUIRY
-        "\u0006", // ACKNOWLEDGE
-        "\u0007", // BELL
-        "\u0008", // BACKSPACE
-        "\u000B", // LINE TABULATION (VERTICAL TAB)
-        "\u000C", // FORM FEED
-        "\u000E", // SHIFT OUT
-        "\u000F", // SHIFT IN
-        "\u0010", // DATA LINK ESCAPE
-        "\u0011", // DEVICE CONTROL ONE
-        "\u0012", // DEVICE CONTROL TWO
-        "\u0013", // DEVICE CONTROL THREE
-        "\u0014", // DEVICE CONTROL FOUR
-        "\u0015", // NEGATIVE ACKNOWLEDGE
-        "\u0016", // SYNCHRONOUS IDLE
-        "\u0017", // END OF TRANSMISSION BLOCK
-        "\u0018", // CANCEL
-        "\u0019", // END OF MEDIUM
-        "\u001A", // SUBSTITUTE
-        "\u001B", // ESCAPE
-        "\u001C", // FILE SEPARATOR
-        "\u001D", // GROUP SEPARATOR
-        "\u001E", // RECORD SEPARATOR
-        "\u001F", // UNIT SEPARATOR
-        "\u007F", // DELETE
-        "\u00A0", // NO-BREAK SPACE
-        "\u00AD", // SOFT HYPHEN
-        "\u034F", // COMBINING GRAPHEME JOINER
-        "\u061C", // ARABIC LETTER MARK
-        "\u115F", // HANGUL CHOSEONG FILLER
-        "\u1160", // HANGUL JUNGSEONG FILLER
-        "\u17B4", // KHMER VOWEL INHERENT AQ
-        "\u17B5", // KHMER VOWEL INHERENT AA
-        "\u180B", // MONGOLIAN FREE VARIATION SELECTOR ONE
-        "\u180C", // MONGOLIAN FREE VARIATION SELECTOR TWO
-        "\u180D", // MONGOLIAN FREE VARIATION SELECTOR THREE
-        "\u180E", // MONGOLIAN VOWEL SEPARATOR
-        "\u200B", // ZERO WIDTH SPACE
-        "\u200C", // ZERO WIDTH NON-JOINER
-        "\u200D", // ZERO WIDTH JOINER
-        "\u200E", // LEFT-TO-RIGHT MARK
-        "\u200F", // RIGHT-TO-LEFT MARK
-        "\u202A", // LEFT-TO-RIGHT EMBEDDING
-        "\u202B", // RIGHT-TO-LEFT EMBEDDING
-        "\u202C", // POP DIRECTIONAL FORMATTING
-        "\u202D", // LEFT-TO-RIGHT OVERRIDE
-        "\u202E", // RIGHT-TO-LEFT OVERRIDE
-        "\u202F", // NARROW NO-BREAK SPACE
-        "\u2060", // WORD JOINER
-        "\u2061", // FUNCTION APPLICATION
-        "\u2062", // INVISIBLE TIMES
-        "\u2063", // INVISIBLE SEPARATOR
-        "\u2064", // INVISIBLE PLUS
-        "\u2066", // LEFT-TO-RIGHT ISOLATE
-        "\u2067", // RIGHT-TO-LEFT ISOLATE
-        "\u2068", // FIRST STRONG ISOLATE
-        "\u2069", // POP DIRECTIONAL ISOLATE
-        "\u206A", // INHIBIT SYMMETRIC SWAPPING
-        "\u206B", // ACTIVATE SYMMETRIC SWAPPING
-        "\u206C", // INHIBIT ARABIC FORM SHAPING
-        "\u206D", // ACTIVATE ARABIC FORM SHAPING
-        "\u206E", // NATIONAL DIGIT SHAPES
-        "\u206F", // NOMINAL DIGIT SHAPES
-        "\u3164", // HANGUL FILLER
-        "\uFEFF", // ZERO WIDTH NO-BREAK SPACE / BOM
-        "\uFFA0", // HALFWIDTH HANGUL FILLER
-        "\uFFF9", // INTERLINEAR ANNOTATION ANCHOR
-        "\uFFFA", // INTERLINEAR ANNOTATION SEPARATOR
-        "\uFFFB", // INTERLINEAR ANNOTATION TERMINATOR
-    };
-    private static string RemoveInvisibleCharacters(string s)
-    {
-        string result = s;
-        foreach (var c in InvisibleCharacters)
+        var client = AmongUsClient.Instance;
+        if (client == null || !client.AmHost) return;
+        if (player == null || player.Data == null) return;
+
+        var tab = SettingTabSingleton<ModerationTab>.Instance;
+        if (tab == null) return;
+
+        var data = player.Data;
+        var clientId = data.ClientId;
+        var name = data.PlayerName ?? string.Empty;
+        var banNames = tab.BanInappropriateNames.Value;
+
+        if (RulesetManager.HasRuleset)
         {
-            result = result.Replace(c, string.Empty);
+            player.SendChatTo(RulesetManager.CurrentRuleSet);
+        }
+        if (banNames && BanWords.ContainsSwear(name))
+        {
+            client.KickWithReason(clientId, "Inappropriate Username", true);
+            return;
         }
 
-        return result;
+        if (banNames && BotNames.Names.Contains(name))
+        {
+            client.KickWithReason(clientId, "Bot Player", true);
+            return;
+        }
+
+        if (IsBlank(name)) player.RpcSetName("Unknown Player");
+
+        if (data.PlayerLevel < tab.PlayerLevelCap.Value)
+        {
+            client.KickWithReason(clientId, "Low level", false);
+            return;
+        }
+
+        var clientData = client.GetClientFromCharacter(player);
+        if (clientData != null && BanListManager.IsTargetOnBanList(clientData, out var banReason, out var banListName))
+        {
+            client.KickWithReason(clientId, banReason, banListName, false);
+            return;
+        }
+
+        var puid = client.GetClient(clientId)?.ProductUserId;
+        if (!string.IsNullOrEmpty(puid)
+            && FriendsListManager.Instance != null
+            && FriendsListManager.Instance.IsPlayerBlocked(puid))
+        {
+            client.KickWithReason(clientId, "Blocked Player", false);
+        }
     }
-    
+
+    public static readonly HashSet<char> InvisibleCharacters = new()
+    {
+        '\u0000', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u0007', '\u0008',
+        '\u000B', '\u000C', '\u000E', '\u000F', '\u0010', '\u0011', '\u0012', '\u0013', '\u0014',
+        '\u0015', '\u0016', '\u0017', '\u0018', '\u0019', '\u001A', '\u001B', '\u001C', '\u001D',
+        '\u001E', '\u001F', '\u007F',
+        '\u00A0',
+        '\u00AD',
+        '\u034F',
+        '\u061C',
+        '\u115F', '\u1160',
+        '\u17B4', '\u17B5',
+        '\u180B', '\u180C', '\u180D', '\u180E',
+        '\u200B', '\u200C', '\u200D', '\u200E', '\u200F',
+        '\u202A', '\u202B', '\u202C', '\u202D', '\u202E', '\u202F',
+        '\u2060', '\u2061', '\u2062', '\u2063', '\u2064',
+        '\u2066', '\u2067', '\u2068', '\u2069',
+        '\u206A', '\u206B', '\u206C', '\u206D', '\u206E', '\u206F',
+        '\u3164',
+        '\uFEFF',
+        '\uFFA0',
+        '\uFFF9', '\uFFFA', '\uFFFB',
+    };
+
+    private static bool IsBlank(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return true;
+        foreach (var c in s)
+        {
+            if (!InvisibleCharacters.Contains(c) && !char.IsWhiteSpace(c)) return false;
+        }
+
+        return true;
+    }
+
+    private static PlayerControl FindPlayer(byte playerId)
+    {
+        foreach (var p in PlayerControl.AllPlayerControls)
+        {
+            if (p != null && p.Data != null && p.Data.PlayerId == playerId) return p;
+        }
+
+        return null;
+    }
+
+    private static void ApplyPermissions(PlayerControl sender, MessageReader reader)
+    {
+        var client = AmongUsClient.Instance;
+        if (client == null || sender.OwnerId != client.HostId) return;
+
+        var target = FindPlayer(reader.ReadByte());
+        var permissions = (Permissions)reader.ReadInt32();
+        if (target == null) return;
+
+        TrackingDataBehaviour.Get(target)?.SetPermissions(permissions);
+    }
+
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
     [HarmonyPostfix]
-    public static void PlayerControl_HandleRpc_Prefix(PlayerControl __instance, ref byte callId, ref MessageReader reader)
+    public static void PlayerControl_HandleRpc_Postfix(PlayerControl __instance, byte callId, MessageReader reader)
     {
-        switch (callId)
-        {
-            //Modded client handshake
-            case 100:
-                HandshakeManager.ModdedPlayers.Add(__instance);
-                PlayerIconsBehaviour.AllIcons.Find(x => x.owner == __instance)?.ModdedIcon.SetActive(true);
-                break;
-            //Request to set settings
-            case 101:
-            {
-                var c = AmongUsClient.Instance;
-                if (c.HostId != c.ClientId) break;
-                if (__instance.CanModifySettings()) break;
-                HostUtilityPlugin.Instance.Log.LogInfo($"[101] from {__instance.PlayerId}");
+        if (__instance == null || reader == null) return;
 
-                GameManager.Instance.LogicOptions.Deserialize(reader);
-                GameOptionsManager.Instance.GameHostOptions = GameOptionsManager.Instance.CurrentGameOptions;
-                GameManager.Instance.LogicOptions.SyncOptions();
-                HostUtilityPlugin.Instance.Log.LogInfo("DING DING DING!!! SYNCED!!!");
-                break;
+        try
+        {
+            switch (callId)
+            {
+                case 100:
+                    if (!HandshakeManager.ModdedPlayers.Contains(__instance))
+                        HandshakeManager.ModdedPlayers.Add(__instance);
+                    PlayerIconsBehaviour.AllIcons.Find(x => x != null && x.owner == __instance)?.ModdedIcon?.SetActive(true);
+                    break;
+
+                case 101:
+                {
+                    var client = AmongUsClient.Instance;
+                    if (client == null || client.HostId != client.ClientId) break;
+                    if (!__instance.CanModifySettings()) break;
+
+                    var logic = GameManager.Instance?.LogicOptions;
+                    var optionsManager = GameOptionsManager.Instance;
+                    if (logic == null || optionsManager == null) break;
+
+                    HostUtilityPlugin.Instance.Log.LogInfo($"[101] from {__instance.PlayerId}");
+                    logic.Deserialize(reader);
+                    optionsManager.GameHostOptions = optionsManager.CurrentGameOptions;
+                    logic.SyncOptions();
+                    HostUtilityPlugin.Instance.Log.LogInfo("DING DING DING!!! SYNCED!!!");
+                    break;
+                }
+
+                case 102:
+                case 104:
+                    ApplyPermissions(__instance, reader);
+                    break;
+
+                case 103:
+                {
+                    if (AmongUsClient.Instance == null || !AmongUsClient.Instance.AmHost) break;
+                    var player = FindPlayer(reader.ReadByte());
+                    if (player != null && player.CanStartGame()) GameStartManager.Instance?.BeginGame();
+                    break;
+                }
             }
-            case 102:
-                var playerId = reader.ReadByte();
-                var player = PlayerControl.AllPlayerControls.ToArray().ToList().Find(x => x.Data.PlayerId == playerId);
-                TrackingDataBehaviour.Get(player).SetPermissions((Permissions)reader.ReadInt32());
-                break;
-            case 103:
-                var playerId2 = reader.ReadByte();
-                var player2 = PlayerControl.AllPlayerControls.ToArray().ToList().Find(x => x.Data.PlayerId == playerId2);
-                if (player2.CanStartGame()) GameStartManager.Instance?.BeginGame();
-                break;
-            case 104:
-                var playerId3 = reader.ReadByte();
-                var player3 = PlayerControl.AllPlayerControls.ToArray().ToList().Find(x => x.Data.PlayerId == playerId3);
-                TrackingDataBehaviour.Get(player3).SetPermissions((Permissions)reader.ReadInt32());
-                break;
+        }
+        catch (Exception e)
+        {
+            HostUtilityPlugin.Instance.Log.LogError($"HandleRpc {callId} from {__instance.PlayerId} failed: {e}");
         }
     }
-}
+}   

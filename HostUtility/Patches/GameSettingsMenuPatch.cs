@@ -54,7 +54,7 @@ public class GameSettingsMenuPatch
         prevBtn.transform.localPosition = new Vector3(-3.775f, -2.2f, -5);
         prevBtn.transform.localScale = Vector3.one;
         prevBtn.OnClick = new Button.ButtonClickedEvent();
-        prevBtn.OnClick.AddListener(new Action(paginationBehaviour.NextPage));
+        prevBtn.OnClick.AddListener(new Action(paginationBehaviour.PreviousPage));
         prevBtn.activeSprites.GetComponent<SpriteRenderer>().size = prevBtn.inactiveSprites.GetComponent<SpriteRenderer>().size = prevBtn.GetComponent<BoxCollider2D>().size = new Vector2(1f, 0.35f);
         Object.Destroy(prevBtn.buttonText.GetComponent<TextTranslatorTMP>());
         prevBtn.buttonText.text = "◀";
@@ -137,25 +137,41 @@ public class GameSettingsMenuPatch
         foreach (var option in __instance.Children)
         {
             var numOption = option.TryCast<NumberOption>();
-            if (numOption != null && !LockedIntOptions.Contains(numOption.intOptionName))
-            {
-                var unlockBtn = Object.Instantiate(numOption.buttons[1], numOption.buttons[1].transform.parent, true);
-                unlockBtn.transform.localPosition += Vector3.right*1.75f;
-                unlockBtn.OnClick = new Button.ButtonClickedEvent();
-                var range = new FloatRange(0, int.MaxValue); //Default
-                if (FloatRanges.TryGetValue(numOption.floatOptionName, out var specifiedRange))
-                {
-                    range = specifiedRange;
-                }
-                unlockBtn.gameObject.AddComponent<NumberOptionUnlocker>().Init(numOption, range);
-
-                if (numOption.floatOptionName == FloatOptionNames.Invalid) return;
-                var incrementButton = Object.Instantiate(numOption.buttons[1], numOption.buttons[1].transform.parent, true);
-                incrementButton.transform.localPosition += Vector3.right;
-                incrementButton.OnClick = new Button.ButtonClickedEvent();
-                incrementButton.gameObject.AddComponent<NumberOptionDivider>().Init(numOption);
-            }
+            if (numOption != null) InitOption(numOption);
         }
+    }
+    
+    [HarmonyPatch(typeof(RolesSettingsMenu), nameof(RolesSettingsMenu.CreateAdvancedSettings))]
+    [HarmonyPostfix]
+    public static void SetUpPostfix(RolesSettingsMenu __instance)
+    {
+        foreach (var option in __instance.advancedSettingChildren)
+        {
+            var numOption = option.TryCast<NumberOption>();
+            if (numOption != null) InitOption(numOption, true);
+        }
+    }
+
+    public static void InitOption(NumberOption numOption, bool isRoleSetting = false)
+    {
+        if (!LockedIntOptions.Contains(numOption.intOptionName))
+        {
+            var unlockBtn = Object.Instantiate(numOption.buttons[1], numOption.buttons[1].transform.parent, true);
+            unlockBtn.transform.localPosition += Vector3.right* (isRoleSetting ? 1f : 1.75f);
+            unlockBtn.OnClick = new Button.ButtonClickedEvent();
+            var range = new FloatRange(0, int.MaxValue); //Default
+            if (FloatRanges.TryGetValue(numOption.floatOptionName, out var specifiedRange))
+            {
+                range = specifiedRange;
+            }
+            unlockBtn.gameObject.AddComponent<NumberOptionUnlocker>().Init(numOption, range);
+        }
+
+        if (numOption.floatOptionName == FloatOptionNames.Invalid) return;
+        var incrementButton = Object.Instantiate(numOption.buttons[1], numOption.buttons[1].transform.parent, true);
+        incrementButton.transform.localPosition += Vector3.right * (isRoleSetting ? 0.5f : 1);
+        incrementButton.OnClick = new Button.ButtonClickedEvent();
+        incrementButton.gameObject.AddComponent<NumberOptionDivider>().Init(numOption);
     }
 
     private static readonly List<Int32OptionNames> LockedIntOptions = [
