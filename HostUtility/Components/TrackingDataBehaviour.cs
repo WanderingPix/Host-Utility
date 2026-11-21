@@ -23,8 +23,8 @@ public class TrackingDataBehaviour : MonoBehaviour
         if (myPlayer.AmOwner)
         {
             Local = this;
+            if (AmongUsClient.Instance.AmHost) permissions = Permissions.Host;
         }
-        if (AmongUsClient.Instance.AmHost) permissions = Permissions.Host;
         Data.Add(myPlayer, this);
     }
     public float timeSinceLastSetColor = 1;
@@ -43,6 +43,7 @@ public class TrackingDataBehaviour : MonoBehaviour
         permissions = value;
         if (myPlayer.AmOwner)
         {
+            HudManager.Instance.ShowPopUp("You're been promoted to " + value);
             bool showSettings = !myPlayer.CanModifySettings();
             var startManager = GameStartManager.Instance;
             string gameName = GameCode.IntToGameName(AmongUsClient.Instance.GameId);

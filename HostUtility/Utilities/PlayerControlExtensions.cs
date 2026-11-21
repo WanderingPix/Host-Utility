@@ -12,8 +12,12 @@ public static class PlayerControlExtensions
         return (int)data.permissions >= (uint)Permissions.CoHost;
     }
     
-    public static bool CanStartGame(this PlayerControl player)
+    public static bool CanStartGame(this PlayerControl player, out bool sendRequest)
     {
+        sendRequest = false;
+        var data = TrackingDataBehaviour.Get(player);
+        if (data == null) return false;
+        sendRequest = data.permissions != Permissions.Host;
         return CanModifySettings(player);
     }
     

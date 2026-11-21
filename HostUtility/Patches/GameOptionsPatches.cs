@@ -55,6 +55,7 @@ public class GameOptionsPatches
     {
         if (__result) return;
         if (PlayerControl.LocalPlayer == null) return;
+        if (!LobbyBehaviour.Instance) return;
         if (PlayerControl.LocalPlayer.CanModifySettings()) __result = true;
     }
 }

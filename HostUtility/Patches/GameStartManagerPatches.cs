@@ -52,7 +52,8 @@ public static class GameStartManagerPatches
     [HarmonyPrefix]
     public static bool GameStartManager_Begin_Prefix(GameStartManager __instance)
     {
-        if (PlayerControl.LocalPlayer.CanStartGame())
+        if (!PlayerControl.LocalPlayer.CanStartGame(out var sendRequest)) return false;
+        if (sendRequest)
         {
             var w = AmongUsClient.Instance.StartRpcImmediately(
                 PlayerControl.LocalPlayer.NetId, 103, SendOption.Reliable, AmongUsClient.Instance.HostId);

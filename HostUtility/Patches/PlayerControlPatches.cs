@@ -208,7 +208,7 @@ public class PlayerControlPatches
                 {
                     if (AmongUsClient.Instance == null || !AmongUsClient.Instance.AmHost) break;
                     var player = FindPlayer(reader.ReadByte());
-                    if (player != null && player.CanStartGame()) GameStartManager.Instance?.BeginGame();
+                    if (player != null && player.CanStartGame(out _)) GameStartManager.Instance?.StartButton.ReceiveClickUp();
                     break;
                 }
             }

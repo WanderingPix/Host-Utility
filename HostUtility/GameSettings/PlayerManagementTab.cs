@@ -92,9 +92,9 @@ public class PlayerManagementTab : GameSettingsTab
                 if (nextLevel > (int)Permissions.CoHost) nextLevel = 0;
                 data.SetPermissions((Permissions)nextLevel);
                 Networking.PromotePlayer(p, (Permissions)nextLevel);
-                button.ColorBlindName.text = data.permissions.ToString();
                 button.ColorBlindName.enabled = true;
                 button.ColorBlindName.color = PermissionVisuals.PermissionLevelColors[data.permissions];
+                button.ColorBlindName.text = data.permissions.ToString();
                 button.StartCoroutine(Effects.Bloop(0, button.ColorBlindName.transform));
                 button.Cancel();
                 SoundManager.Instance.PlaySound(HudManager.Instance.MeetingPrefab.VoteSound, false);
