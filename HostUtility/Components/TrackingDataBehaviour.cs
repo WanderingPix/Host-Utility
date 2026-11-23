@@ -20,12 +20,19 @@ public class TrackingDataBehaviour : MonoBehaviour
     }
     private void Start()
     {
+        Data.Add(myPlayer, this);
         if (myPlayer.AmOwner)
         {
-            Local = this;
             if (AmongUsClient.Instance.AmHost) permissions = Permissions.Host;
+            Local = this;
+            return;
         }
-        Data.Add(myPlayer, this);
+
+        if (AmongUsClient.Instance.AmHost)
+        {
+            Networking.RpcPromotePlayer(myPlayer, 
+                PlayerPermissionsManager.GetPermissions(myPlayer));
+        }
     }
     public float timeSinceLastSetColor = 1;
     public float timeSinceLastUpdateSystem = 1;
@@ -38,12 +45,13 @@ public class TrackingDataBehaviour : MonoBehaviour
         timeSinceLastMurder += Time.deltaTime;
     }
 
-    public void SetPermissions(Permissions value)
+    public void SetPermissions(Permissions value, bool shouldNotify = true)
     {
         permissions = value;
+        if (Local && Local.permissions == Permissions.Host) PlayerPermissionsManager.AddPlayer(myPlayer, permissions);
         if (myPlayer.AmOwner)
         {
-            HudManager.Instance.ShowPopUp("You're been promoted to " + value);
+            if (shouldNotify) HudManager.Instance.Notifier.AddMessage("You're been promoted to " + value);
             bool showSettings = !myPlayer.CanModifySettings();
             var startManager = GameStartManager.Instance;
             string gameName = GameCode.IntToGameName(AmongUsClient.Instance.GameId);

@@ -21,7 +21,7 @@ public abstract class ModdedOption<T> : ModdedOption
     public T Value => GetValue();
     public T StoredValue { get; set; }
     public T DefaultValue { get; set; }
-
+    public Action<T> OnValueChanged;
     private T GetValue()
     {
         if (AmongUsClient.Instance.AmHost)
@@ -34,8 +34,13 @@ public abstract class ModdedOption<T> : ModdedOption
     }
     public override void Bind(string groupName)
     {
+        void ValueChanged(object sender, EventArgs e)
+        {
+            OnValueChanged?.Invoke(Value);
+        }
         HostUtilityPlugin.Instance.Log.LogInfo($"Binding {OptionType.ToString()} option {Name}...");
         ConfigEntry = HostUtilityPlugin.Instance.Config.Bind(OptionType.Name + " Options", Name, DefaultValue);
+        ConfigEntry.SettingChanged += ValueChanged;
         HostUtilityPlugin.Instance.Log.LogInfo($"Bound {OptionType.ToString()} option {Name}...");
         Init = true;
     }

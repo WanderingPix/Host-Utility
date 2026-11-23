@@ -19,7 +19,6 @@ public class OptionGroup
             categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.8f, y, -2f);
             int maskLayer = 20;
-            categoryHeaderMasked.Background.color = Color.Lerp(categoryHeaderMasked.Background.color, new Color(0.1f, 0.1f, 0.5f), 0.4f);
             categoryHeaderMasked.Background.material.SetInt(PlayerMaterial.MaskLayer, maskLayer);
             if (categoryHeaderMasked.Divider != null)
                 categoryHeaderMasked.Divider.material.SetInt(PlayerMaterial.MaskLayer, maskLayer);

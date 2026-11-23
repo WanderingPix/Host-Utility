@@ -20,10 +20,7 @@ public class GameOptionsPatches
     {
         if (PlayerControl.LocalPlayer.CanModifySettings())
         {
-            var w = AmongUsClient.Instance.StartRpcImmediately(
-                PlayerControl.LocalPlayer.NetId, 101, SendOption.Reliable, AmongUsClient.Instance.HostId);
-            GameManager.Instance.LogicOptions.Serialize(w);
-            AmongUsClient.Instance.FinishRpcImmediately(w);
+            Networking.CmdSyncSettings();
         }
     }
 

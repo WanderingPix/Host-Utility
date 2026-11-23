@@ -27,13 +27,14 @@ public class RulesetsTab : GameSettingsTab
         bubble.Player.InitBody();
         bubble.Player.UpdateFromLocalPlayer(PlayerMaterial.MaskType.None);
         bubble.NameText.text = "Message Preview";
-        bubble.TextArea.text = "Select A Ruleset to preview!";
+        bubble.TextArea.text = RulesetManager.CurrentRuleSet;
         bubble.Background.size = new Vector2(3.25f, 4.125f);
         bubble.transform.localPosition = new Vector3(0.32f, 0.1f, -20);
         bubble.Player.transform.localPosition = new Vector3(1.1f, 1.5f, -1f);
         bubble.votedMark.enabled = bubble.Xmark.enabled = false;
         bubble.NameText.transform.localPosition = new Vector3(1.65f, 1.75f, 0);
         bubble.TextArea.transform.localPosition = new Vector3(0.8f, 1.2f, 0);
+        bubble.TextArea.rectTransform.sizeDelta /= new Vector2(1.75f, 1);
         bubble.maskLayer = 20;
         bubble.SetMaskLayer();
         bubble.transform.SetParent(parentTransform.parent, true);
@@ -51,7 +52,7 @@ public class RulesetsTab : GameSettingsTab
                     btn.SelectButton(false);
                 }
                 bubble.TextArea.text = contents;
-            }, ref y);
+            }, ref y).SelectButton(contents == RulesetManager.CurrentRuleSet);
         }
         CreateRulesetButton(gameOptionsMenu, parentTransform, "New Rule Set", () =>
         {

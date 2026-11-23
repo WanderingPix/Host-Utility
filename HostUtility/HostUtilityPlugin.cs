@@ -21,6 +21,7 @@ public partial class HostUtilityPlugin : BasePlugin
     public ConfigEntry<bool> UseHostAuthority;
     public static AssetBundle Bundle;
     public Harmony Harmony { get; } = new(Id);
+    public static bool IsPreRelease => true;
     public override void Load()
     {
         Instance = this;

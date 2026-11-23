@@ -57,7 +57,7 @@ public class PlayerControlPatches
     private static void RunHostChecks(PlayerControl player)
     {
         var client = AmongUsClient.Instance;
-        if (client == null || !client.AmHost) return;
+        if (TrackingDataBehaviour.Local && TrackingDataBehaviour.Local.permissions == Permissions.Host) return;
         if (player == null || player.Data == null) return;
 
         var tab = SettingTabSingleton<ModerationTab>.Instance;
@@ -86,7 +86,7 @@ public class PlayerControlPatches
 
         if (IsBlank(name)) player.RpcSetName("Unknown Player");
 
-        if (data.PlayerLevel < tab.PlayerLevelCap.Value)
+        if (!tab.PlayerLevelCap.Value.Contains(data.PlayerLevel))
         {
             client.KickWithReason(clientId, "Low level", false);
             return;
@@ -153,18 +153,14 @@ public class PlayerControlPatches
         return null;
     }
 
-    private static void ApplyPermissions(PlayerControl sender, MessageReader reader)
+    [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSyncSettings))]
+    [HarmonyPrefix]
+    public static bool PlayerControl_RpcSyncSettingsPatch(PlayerControl __instance)
     {
-        var client = AmongUsClient.Instance;
-        if (client == null || sender.OwnerId != client.HostId) return;
-
-        var target = FindPlayer(reader.ReadByte());
-        var permissions = (Permissions)reader.ReadInt32();
-        if (target == null) return;
-
-        TrackingDataBehaviour.Get(target)?.SetPermissions(permissions);
+        if (__instance.AmOwner && (int)TrackingDataBehaviour.Local.permissions < (int)Permissions.Host) return false;
+        return true;
     }
-
+    
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
     [HarmonyPostfix]
     public static void PlayerControl_HandleRpc_Postfix(PlayerControl __instance, byte callId, MessageReader reader)
@@ -182,26 +178,13 @@ public class PlayerControlPatches
                     break;
 
                 case 101:
-                {
-                    var client = AmongUsClient.Instance;
-                    if (client == null || client.HostId != client.ClientId) break;
-                    if (!__instance.CanModifySettings()) break;
-
-                    var logic = GameManager.Instance?.LogicOptions;
-                    var optionsManager = GameOptionsManager.Instance;
-                    if (logic == null || optionsManager == null) break;
-
-                    HostUtilityPlugin.Instance.Log.LogInfo($"[101] from {__instance.PlayerId}");
-                    logic.Deserialize(reader);
-                    optionsManager.GameHostOptions = optionsManager.CurrentGameOptions;
-                    logic.SyncOptions();
-                    HostUtilityPlugin.Instance.Log.LogInfo("DING DING DING!!! SYNCED!!!");
+                    Networking.HandleSyncSettings(__instance, reader);
                     break;
-                }
-
                 case 102:
+                    Networking.HandleKickPlayer(__instance, reader);
+                    break;
                 case 104:
-                    ApplyPermissions(__instance, reader);
+                    Networking.HandlePromotePlayer(__instance, reader);
                     break;
 
                 case 103:

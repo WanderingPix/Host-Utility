@@ -27,6 +27,15 @@ public static class PlayerControlExtensions
         if (data == null) return false;
         return (int)data.permissions >= (uint)Permissions.Moderator;
     }
+
+    public static bool CanKickOrBan(this PlayerControl player, out bool sendRequest)
+    {
+        sendRequest = false;
+        var data = TrackingDataBehaviour.Get(player);
+        if (data == null) return false;
+        sendRequest = data.permissions != Permissions.Host;
+        return player.IsModerator();
+    }
     
     public static void SendChatTo(this PlayerControl target, string text, PlayerControl asPlayer = null)
     {

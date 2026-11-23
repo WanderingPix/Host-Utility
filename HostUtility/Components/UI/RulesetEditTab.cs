@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Il2CppSystem.Reflection.Metadata.Ecma335;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,7 +30,6 @@ public class RulesetEditTab(IntPtr ptr) : MonoBehaviour(ptr)
         bubbleTextBox.OnFocusLost  = new Button.ButtonClickedEvent();
         bubbleTextBox.allowAllCharacters = true;
         bubbleTextBox.characterLimit = 250;
-        bubble.TextArea.rectTransform.sizeDelta *= new Vector2(1.5f, 1);
         bubble.NameText.m_enableWordWrapping = true;
         bubbleTextBox.Pipe = Instantiate(HudManager.Instance.Chat.freeChatField.textArea.Pipe, bubbleTextBox.transform);
         bubbleTextBox.pipeBlinkTimer = 0.7f;
@@ -104,14 +104,17 @@ public class RulesetEditTab(IntPtr ptr) : MonoBehaviour(ptr)
         bubble.maskLayer = 0;
         bubble.SetMaskLayer();
         var formatControls = CreateFormatControls();
+        CreateLabel("Formatting").transform.localPosition = new Vector3(-1.125f, -1.55f, -100);
         formatControls.transform.SetParent(gameObject.transform, false);
-        formatControls.transform.localPosition = new Vector3(-0.95f, -1.5f, -1);
+        formatControls.transform.localPosition = new Vector3(0.5f, -1.5f, -1);
         var sizeControls = CreateSizeControls();
+        CreateLabel("Scale").transform.localPosition = new Vector3(-1.125f, -2.05f, -100);
         sizeControls.transform.SetParent(gameObject.transform, false);
-        sizeControls.transform.localPosition = new Vector3(-0.95f, -2f, -1);
+        sizeControls.transform.localPosition = new Vector3(0.5f, -2f, -1);
         var colorControls = CreateColorControls(null);
+        CreateLabel("Color").transform.localPosition = new Vector3(-1.125f, -2.55f, -100);
         colorControls.transform.SetParent(gameObject.transform, false);
-        colorControls.transform.localPosition = new Vector3(-1.175f, -2.5f, -1);
+        colorControls.transform.localPosition = new Vector3(0.3f, -2.5f, -1);
 
         _toReactivate = [parentTransform.transform.parent.gameObject, leftPanel, originalLabel.gameObject, tint, tip ];
     }
@@ -178,51 +181,44 @@ public class RulesetEditTab(IntPtr ptr) : MonoBehaviour(ptr)
         var grid = container.AddComponent<GridArrange>();
         grid.Alignment = GridArrange.StartAlign.Right;
         grid.MaxColumns = 8;
-        grid.CellSize = new Vector2(0.4f, -0.4f);
+        grid.CellSize = new Vector2(0.44f, -0.44f);
         colorButtons = [];
+        int i = 0;
         foreach (var col in Colors)
         {
-            var btn = CreateColorButton(col);
+            var btn = CreateColorButton(col, ColorNames[i]);
             btn.transform.SetParent(container.transform);
             colorButtons.Add(btn);
+            i++;
         }
         colorButtons[0].SelectButton(true);
         return container;
     }
     
-    public static readonly Color32[] Colors =
+    public static readonly Color[] Colors =
     [
-        // Light (pastel)
-        new Color32(255, 255, 255, 255),
-        new Color32(255, 166, 166, 255), // Light Red
-        new Color32(166, 255, 166, 255), // Light Green
-        new Color32(166, 166, 255, 255), // Light Blue
-        new Color32(166, 255, 255, 255), // Light Cyan
-        new Color32(255, 224, 166, 255), // Light Orange
-        new Color32(255, 203, 229, 255), // Light Pink
-        new Color32(211, 166, 211, 255), // Light Purple
-
-        // Normal
-        new Color32(127, 127, 127, 255),
-        new Color32(255, 0, 0, 255),     // Red
-        new Color32(0, 255, 0, 255),     // Green
-        new Color32(0, 0, 255, 255),     // Blue
-        new Color32(0, 255, 255, 255),   // Cyan
-        new Color32(255, 165, 0, 255),   // Orange
-        new Color32(255, 105, 180, 255), // Pink
-        new Color32(128, 0, 128, 255),   // Purple
-
-        // Dark
-        new Color32(0, 0, 0, 255),
-        new Color32(128, 0, 0, 255),     // Dark Red
-        new Color32(0, 128, 0, 255),     // Dark Green
-        new Color32(0, 0, 128, 255),     // Dark Blue
-        new Color32(0, 128, 128, 255),   // Dark Cyan
-        new Color32(128, 82, 0, 255),    // Dark Orange
-        new Color32(128, 53, 90, 255),   // Dark Pink
-        new Color32(64, 0, 64, 255)      // Dark Purple
+        Color.red,
+        Color.green,
+        Color.blue,
+        Color.black,
+        new Color(1, 0.5f, 0),
+        new Color(0.5f, 0, 0.9f),
+        Color.white,
+        Color.yellow
     ];
-    private PassiveButton CreateColorButton(Color32 color)
+
+    public static List<string> ColorNames =
+    [
+        "red",
+        "green",
+        "blue",
+        "black",
+        "orange",
+        "purple",
+        "white",
+        "yellow"
+    ];
+    private PassiveButton CreateColorButton(Color color, string id)
     {
         var gameSettingMenu = gameOptionsMenu.transform.parent.parent.GetComponent<GameSettingMenu>();
         var button = Instantiate(gameSettingMenu.GamePresetsButton);
@@ -246,7 +242,7 @@ public class RulesetEditTab(IntPtr ptr) : MonoBehaviour(ptr)
                 btn.SelectButton(false);
             }
             button.SelectButton(!button.selected);
-            bubbleTextBox.SetText(bubbleTextBox.text + $"<color=#{ColorUtility.ToHtmlStringRGBA(color)}>");
+            bubbleTextBox.SetText(bubbleTextBox.text + $"<color={id}>");
             bubbleTextBox.GiveFocus();
         }));
         button.GetComponent<BoxCollider2D>().size = 
@@ -310,5 +306,15 @@ public class RulesetEditTab(IntPtr ptr) : MonoBehaviour(ptr)
         button.buttonText.m_minFontSize = 0.5f;
         button.buttonText.m_maxFontSize = 2f;
         return button;
+    }
+
+    private GameObject CreateLabel(string text)
+    {
+        var original = LobbyInfoPane._instance.transform.FindChild("AspectSize/CapacityLabel");
+        var label = Instantiate(original, transform);
+        var tmp = label.GetChild(1).GetComponent<TextMeshPro>();
+        Destroy(tmp.GetComponent<TextTranslatorTMP>());
+        tmp.text =  text;
+        return label.gameObject;
     }
 }

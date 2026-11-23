@@ -6,9 +6,11 @@ namespace HostUtility;
 
 public static class HostUtilityDirectories
 {
-    public static string GetDataPath()
+    private static string GetDataPath()
     {
-        return OperatingSystem.IsAndroid() || OperatingSystem.IsIOS() ? Environment.GetEnvironmentVariable("STAR_DATA_PATH") : Paths.BepInExRootPath;
+        return Path.Combine((OperatingSystem.IsAndroid() || OperatingSystem.IsIOS()
+            ? Environment.GetEnvironmentVariable("STAR_DATA_PATH")
+            : Paths.GameRootPath)!, "Host Utility");
     }
     public static string RulesetsPath => Path.Combine(GetDataPath(), "Rulesets");
 

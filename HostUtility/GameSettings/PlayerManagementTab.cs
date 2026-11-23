@@ -28,7 +28,7 @@ public class PlayerManagementTab : GameSettingsTab
         var grid = container.AddComponent<GridArrange>();
         grid.Alignment = GridArrange.StartAlign.Right;
         grid.MaxColumns = 2;
-        grid.CellSize = new Vector2(3, 0.8f);
+        grid.CellSize = new Vector2(3, -0.8f);
 
         var nameplatePrefab = HudManager.Instance.MeetingPrefab.PlayerButtonPrefab;
         foreach (var p in PlayerControl.AllPlayerControls)
@@ -91,8 +91,7 @@ public class PlayerManagementTab : GameSettingsTab
                 nextLevel++;
                 if (nextLevel > (int)Permissions.CoHost) nextLevel = 0;
                 data.SetPermissions((Permissions)nextLevel);
-                Networking.PromotePlayer(p, (Permissions)nextLevel);
-                button.ColorBlindName.enabled = true;
+                Networking.RpcPromotePlayer(p, (Permissions)nextLevel);
                 button.ColorBlindName.color = PermissionVisuals.PermissionLevelColors[data.permissions];
                 button.ColorBlindName.text = data.permissions.ToString();
                 button.StartCoroutine(Effects.Bloop(0, button.ColorBlindName.transform));

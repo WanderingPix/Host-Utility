@@ -1,4 +1,5 @@
 using HarmonyLib;
+using UnityEngine.SceneManagement;
 
 namespace HostUtility.Patches;
 
@@ -10,7 +11,7 @@ public class HostAuthorityPatch
     {
         public static void Postfix(ref int __result)
         {
-            if (AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame && HostUtilityPlugin.Instance.UseHostAuthority.Value)
+            if (AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame && HostUtilityPlugin.Instance.UseHostAuthority.Value && SceneManager.GetActiveScene().name != "FindAGame")
             {
                 var revision = __result % 50;
                 if (revision < 25)

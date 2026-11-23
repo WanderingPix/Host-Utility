@@ -54,5 +54,12 @@ public class ModerationTab : GameSettingsTab
     public ModdedBoolOption BanInappropriateNames = new ModdedBoolOption("Ban Inappropriate Names", false);
     public ModdedBoolOption BanInappropriateMessages = new ModdedBoolOption("Ban Inappropriate Messages", false);
     public ModdedBoolOption KickSuspectedBots = new ModdedBoolOption("Kick Suspected Bots", false);
-    public ModdedNumberOption PlayerLevelCap = new ModdedNumberOption("Player Level Cap", 0, 0, 100, 5);
+    public ModdedFloatRangeOption PlayerLevelCap = new ModdedFloatRangeOption()
+    {
+        Name = "Player Level Range",
+        Range = new FloatRange(0, 100),
+        DefaultValue = new FloatRange(0, 100),
+        MinDistance = 5,
+        RoundToInt = true
+    };
 }
